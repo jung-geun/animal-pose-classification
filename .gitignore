@@ -1,0 +1,8 @@
+model/body_25/pose_deploy.prototxt
+model/body_25/pose_iter_584000.caffemodel
+model/coco/pose_deploy_linevec.prototxt
+model/coco/pose_iter_440000.caffemodel
+model/mpi/pose_deploy_linevec_faster_4_stages.prototxt
+model/mpi/pose_deploy_linevec.prototxt
+model/mpi/pose_iter_160000.caffemodel
+model/
