@@ -6,3 +6,6 @@ model/mpi/pose_deploy_linevec_faster_4_stages.prototxt
 model/mpi/pose_deploy_linevec.prototxt
 model/mpi/pose_iter_160000.caffemodel
 model/
+frames/
+.idea/
+__pycache__/
