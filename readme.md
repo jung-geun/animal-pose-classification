@@ -4,7 +4,15 @@
 
 [//]: # "Short description of the project"
 
-[사용법]
+[기본 세팅]
+install.bat - 기본 패키지 설치 및 환경 설정
+
+run.bat - 프로그램 실행
+
+remove.bat - 프로그램 및 패키지, 작업환경 제거
+
+
+[설명]
 
 1. 영상 전처리 preprocessing (frames - > skeleton data)
    - 영상의 경로를 csv 로 저장

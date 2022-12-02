@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>475</width>
+    <height>487</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,8 +19,8 @@
      <rect>
       <x>0</x>
       <y>-1</y>
-      <width>801</width>
-      <height>581</height>
+      <width>481</width>
+      <height>451</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -30,17 +30,56 @@
      <attribute name="title">
       <string>Tab 1</string>
      </attribute>
-     <widget class="QLineEdit" name="lineEdit">
+     <widget class="QProgressBar" name="progressbar_pre">
       <property name="geometry">
        <rect>
-        <x>40</x>
-        <y>30</y>
-        <width>113</width>
-        <height>20</height>
+        <x>120</x>
+        <y>340</y>
+        <width>261</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+      <property name="format">
+       <string>%p%</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_pre">
+      <property name="geometry">
+       <rect>
+        <x>290</x>
+        <y>390</y>
+        <width>75</width>
+        <height>23</height>
        </rect>
       </property>
       <property name="text">
        <string>전처리</string>
+      </property>
+     </widget>
+     <widget class="QPlainTextEdit" name="preprocess_list">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>30</y>
+        <width>261</width>
+        <height>281</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_get_data">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>390</y>
+        <width>91</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>목록 새로고침</string>
       </property>
      </widget>
     </widget>
@@ -48,11 +87,193 @@
      <attribute name="title">
       <string>Tab 2</string>
      </attribute>
+     <widget class="QPushButton" name="btn_model_1">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>110</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>SVC</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_model_2">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>160</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>tree</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_model_3">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>210</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>forest</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_model_4">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>260</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>SGD</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_model_5">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>310</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>logistic</string>
+      </property>
+     </widget>
+     <widget class="QPlainTextEdit" name="Text_train">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>40</y>
+        <width>251</width>
+        <height>221</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QProgressBar" name="progressbar_train">
+      <property name="geometry">
+       <rect>
+        <x>180</x>
+        <y>280</y>
+        <width>251</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_train">
+      <property name="geometry">
+       <rect>
+        <x>350</x>
+        <y>340</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>학습</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
       <string>쪽</string>
      </attribute>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>10</y>
+        <width>400</width>
+        <height>300</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>IMG</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="video_stop">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>350</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>stop</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="video_start">
+      <property name="geometry">
+       <rect>
+        <x>270</x>
+        <y>350</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>start</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="radio_cam_0">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>350</y>
+        <width>90</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>cam 0</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="radio_cam_1">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>380</y>
+        <width>90</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>cam 1</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_value">
+      <property name="geometry">
+       <rect>
+        <x>180</x>
+        <y>320</y>
+        <width>101</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>결과 : </string>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>
@@ -61,7 +282,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>475</width>
      <height>21</height>
     </rect>
    </property>
@@ -69,11 +290,17 @@
     <property name="title">
      <string>메뉴</string>
     </property>
+    <addaction name="actionabout_2"/>
    </widget>
    <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionabout">
+   <property name="text">
+    <string>about</string>
+   </property>
+  </action>
+  <action name="actionabout_2">
    <property name="text">
     <string>about</string>
    </property>

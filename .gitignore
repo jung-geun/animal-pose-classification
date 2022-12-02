@@ -9,3 +9,5 @@ model/
 frames/
 .idea/
 __pycache__/
+data.csv
+pose.json
