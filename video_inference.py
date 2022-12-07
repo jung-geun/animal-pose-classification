@@ -100,7 +100,6 @@ def real_infereance(self=None, cam=0):
                 break
             if self.flag == 1:
                 cap.release()
-                
                 break
 
             h, w, c = image.shape
@@ -112,3 +111,4 @@ def real_infereance(self=None, cam=0):
             self.label_value.setText(f'결과 : {y_pred}')
 
     cap.release()
+    print("end")

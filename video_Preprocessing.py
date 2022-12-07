@@ -32,12 +32,18 @@ def get_csv():
         for v in x_list:
             # print(v)
             v = y_path + "/" + v
-            _dir = os.listdir(v)
-            for data in _dir:
+            if os.path.isdir(v):
+                _dir = os.listdir(v)
+                for data in _dir:
                 # print(f"{v}/{data}")
                 # print(y)
-                if os.path.splitext(data)[1] in [".png", ".jpg"]:
-                    x_train.append(f"{v}/{data}")
+                    if os.path.splitext(data)[1] in [".png", ".jpg"]:
+                        x_train.append(f"{v}/{data}")
+                        y_train.append(y)
+                        data = pd.DataFrame({"image": x_train, "pose": y_train})
+            else:
+                if os.path.splitext(v)[1] in [".png", ".jpg"]:
+                    x_train.append(v)
                     y_train.append(y)
                     data = pd.DataFrame({"image": x_train, "pose": y_train})
 
@@ -55,7 +61,7 @@ def get_csv():
     # print(data.value_counts())
     data.to_csv("data.csv", index=False)
 
-
+get_csv()
 
 def img_media(self=None, img_path=None, csv_path="./data.csv", json_path="./pose.json"):
     # mp_drawing = mp.solutions.drawing_utils
