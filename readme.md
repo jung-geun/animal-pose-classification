@@ -33,17 +33,17 @@ frames/
 가상환경이 이미 설치되어 있을 경우 아래의 명령어를 통해 프로그램을 실행할 수 있습니다.<br>
 
 ```bash
-$ git clone https://github.com/jung-geun/fitness.git
+$ git clone https://github.com/jung-geun/yoga-pose-recognition.git
 $ cd fitness
 $ pip install -r requirements.txt
 ```
 
 시스템에 anaconda를 설치 하지 않을때는 아래의 명령어를 통해 설치해주세요.<br>
 간단하게 miniconda를 설치하고 가상환경을 생성해주는 스크립트를 실행하면 됩니다.<br>
-conda 가상환경 fitness를 생성하고, 필요한 패키지를 설치합니다.<br>
+conda 가상환경 yoga를 생성하고, 필요한 패키지를 설치합니다.<br>
 
 ```bash
-$ git clone https://github.com/jung-geun/fitness.git
+$ git clone https://github.com/jung-geun/yoga-pose-recognition.git
 $ cd fitness
 $ install.bat
 ```
@@ -63,6 +63,11 @@ $ python gui.py
 ```bash
 $ run.bat
 ```
+
+실행 중 모델이 정상적으로 저장이 되지 않을 경우 model 디렉토리가 존재하는지 확인해주세요.<br>
+model 디렉토리가 정상적으로 생성되지 않을 경우 권한이 없는 경우가 많습니다.<br>
+윈도우의 경우 권한이 없는 경우 관리자 권한으로 실행해주세요.<br>
+리눅스의 경우 현재 디텍토리의 권한을 확인해주세요.<br>
 
 ## Remove
 
@@ -130,7 +135,7 @@ remove.bat - 프로그램 및 패키지, 작업환경 제거
 - 학습된 모델을 불러옴
 - 모델 테스트
 
-[출처] <br>
+### 참고자료 <br>
 -- 스켈레톤 추정
 https://google.github.io/mediapipe/solutions/pose.html <br>
 -- wget 다운로드

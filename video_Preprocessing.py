@@ -16,6 +16,13 @@ def get_csv():
 
     # 파일 경로 설정
     path = "./frames"
+    
+    try:
+        if not os.path.exists(path):
+            os.mkdir(path)
+    except:
+        print(f"Error: {path} 폴더 생성 실패")
+        
 
     # y 값이 될 리스트 추출
     # 디렉토리 명을 Y 로 지정하였음

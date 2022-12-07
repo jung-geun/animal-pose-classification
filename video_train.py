@@ -124,6 +124,12 @@ def do_train(self=None):
         return -4
 
     try:
+        if not os.path.exists("./model"):
+            os.mkdir("./model")
+    except:
+        print("Error: 폴더 생성 실패")
+        
+    try:
         with open(f"./model/model_{self.model}.pkl", "wb") as f:
             pickle.dump(model, f)
             self.Text_train.appendPlainText(f"{self.model} 모델 저장 완료")
