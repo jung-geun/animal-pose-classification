@@ -16,13 +16,12 @@ def get_csv():
 
     # 파일 경로 설정
     path = "./frames"
-    
+
     try:
         if not os.path.exists(path):
             os.mkdir(path)
     except:
         print(f"Error: {path} 폴더 생성 실패")
-        
 
     # y 값이 될 리스트 추출
     # 디렉토리 명을 Y 로 지정하였음
@@ -42,8 +41,8 @@ def get_csv():
             if os.path.isdir(v):
                 _dir = os.listdir(v)
                 for data in _dir:
-                # print(f"{v}/{data}")
-                # print(y)
+                    # print(f"{v}/{data}")
+                    # print(y)
                     if os.path.splitext(data)[1] in [".png", ".jpg"]:
                         x_train.append(f"{v}/{data}")
                         y_train.append(y)
@@ -68,7 +67,9 @@ def get_csv():
     # print(data.value_counts())
     data.to_csv("data.csv", index=False)
 
+
 get_csv()
+
 
 def img_media(self=None, img_path=None, csv_path="./data.csv", json_path="./pose.json"):
     # mp_drawing = mp.solutions.drawing_utils
@@ -88,11 +89,11 @@ def img_media(self=None, img_path=None, csv_path="./data.csv", json_path="./pose
 
             for index, row in data.iterrows():
                 # if row["pose"] in ["goddess", "tree", "warrior2", "plank", "downdog"]:
-                    # print(os.path.splitext(row["image"]))
+                # print(os.path.splitext(row["image"]))
                 if os.path.splitext(row["image"])[1] in [".png", ".jpg"]:
                     r = {"pose": row["pose"], "image": row["image"]}
                     IMAGE_FILES.append(r)
-                        # print(IMAGE_FILES)
+                    # print(IMAGE_FILES)
     except:
         return -2
 
@@ -108,14 +109,14 @@ def img_media(self=None, img_path=None, csv_path="./data.csv", json_path="./pose
         return -3
 
     try:
-
         BG_COLOR = (192, 192, 192)  # 회색
         # mediapipe 의 pose 모델 사용
         with mp_pose.Pose(
-                static_image_mode=True,
-                model_complexity=2,
-                enable_segmentation=True,
-                min_detection_confidence=0.5) as pose:
+            static_image_mode=True,
+            model_complexity=2,
+            enable_segmentation=True,
+            min_detection_confidence=0.5,
+        ) as pose:
             for idx, file in enumerate(IMAGE_FILES):
                 # print(idx)
                 image = cv2.imread(file["image"])
@@ -134,20 +135,68 @@ def img_media(self=None, img_path=None, csv_path="./data.csv", json_path="./pose
 
                 # 각도 도출을 위한 파트 추출
                 # 왼 팔 ( 오른쪽 어깨 - 왼쪽 어깨 - 왼쪽 팔꿈치 - 왼 손 )
-                arm_left = {"x": [results.pose_landmarks.landmark[12].x, results.pose_landmarks.landmark[11].x, results.pose_landmarks.landmark[13].x, results.pose_landmarks.landmark[15].x],
-                            "y": [results.pose_landmarks.landmark[12].y, results.pose_landmarks.landmark[11].y, results.pose_landmarks.landmark[13].y, results.pose_landmarks.landmark[15].y]}
+                arm_left = {
+                    "x": [
+                        results.pose_landmarks.landmark[12].x,
+                        results.pose_landmarks.landmark[11].x,
+                        results.pose_landmarks.landmark[13].x,
+                        results.pose_landmarks.landmark[15].x,
+                    ],
+                    "y": [
+                        results.pose_landmarks.landmark[12].y,
+                        results.pose_landmarks.landmark[11].y,
+                        results.pose_landmarks.landmark[13].y,
+                        results.pose_landmarks.landmark[15].y,
+                    ],
+                }
 
                 # 오른 팔 ( 왼쪽 어깨 - 오른쪽 어깨 - 오른쪽 팔꿈치 - 오른 손 )
-                arm_right = {"x": [results.pose_landmarks.landmark[11].x, results.pose_landmarks.landmark[12].x, results.pose_landmarks.landmark[14].x, results.pose_landmarks.landmark[16].x],
-                             "y": [results.pose_landmarks.landmark[11].y, results.pose_landmarks.landmark[12].y, results.pose_landmarks.landmark[14].y, results.pose_landmarks.landmark[16].y]}
+                arm_right = {
+                    "x": [
+                        results.pose_landmarks.landmark[11].x,
+                        results.pose_landmarks.landmark[12].x,
+                        results.pose_landmarks.landmark[14].x,
+                        results.pose_landmarks.landmark[16].x,
+                    ],
+                    "y": [
+                        results.pose_landmarks.landmark[11].y,
+                        results.pose_landmarks.landmark[12].y,
+                        results.pose_landmarks.landmark[14].y,
+                        results.pose_landmarks.landmark[16].y,
+                    ],
+                }
 
                 # 왼 다리 ( 왼쪽 어깨 - 왼쪽 허리 - 왼쪽 무릎 - 왼 발 )
-                leg_left = {"x": [results.pose_landmarks.landmark[11].x, results.pose_landmarks.landmark[23].x, results.pose_landmarks.landmark[25].x, results.pose_landmarks.landmark[27].x],
-                            "y": [results.pose_landmarks.landmark[11].y, results.pose_landmarks.landmark[23].y, results.pose_landmarks.landmark[25].y, results.pose_landmarks.landmark[27].y]}
+                leg_left = {
+                    "x": [
+                        results.pose_landmarks.landmark[11].x,
+                        results.pose_landmarks.landmark[23].x,
+                        results.pose_landmarks.landmark[25].x,
+                        results.pose_landmarks.landmark[27].x,
+                    ],
+                    "y": [
+                        results.pose_landmarks.landmark[11].y,
+                        results.pose_landmarks.landmark[23].y,
+                        results.pose_landmarks.landmark[25].y,
+                        results.pose_landmarks.landmark[27].y,
+                    ],
+                }
 
                 # 오른 다리 ( 오른쪽 어깨 - 오른쪽 허리 - 오른쪽 무릎 - 오른 발 )
-                leg_right = {"x": [results.pose_landmarks.landmark[12].x, results.pose_landmarks.landmark[24].x, results.pose_landmarks.landmark[26].x, results.pose_landmarks.landmark[28].x],
-                             "y": [results.pose_landmarks.landmark[12].y, results.pose_landmarks.landmark[24].y, results.pose_landmarks.landmark[26].y, results.pose_landmarks.landmark[28].y]}
+                leg_right = {
+                    "x": [
+                        results.pose_landmarks.landmark[12].x,
+                        results.pose_landmarks.landmark[24].x,
+                        results.pose_landmarks.landmark[26].x,
+                        results.pose_landmarks.landmark[28].x,
+                    ],
+                    "y": [
+                        results.pose_landmarks.landmark[12].y,
+                        results.pose_landmarks.landmark[24].y,
+                        results.pose_landmarks.landmark[26].y,
+                        results.pose_landmarks.landmark[28].y,
+                    ],
+                }
 
                 # 정상적으로 인식 되는지 확인
                 # print(
@@ -181,12 +230,17 @@ def img_media(self=None, img_path=None, csv_path="./data.csv", json_path="./pose
                 # mp_drawing.plot_landmarks(
                 # results.pose_world_landmarks, mp_pose.POSE_CONNECTIONS)
 
-                a = {"arm_left": arm_left, "arm_right": arm_right,
-                     "leg_left": leg_left, "leg_right": leg_right, "pose": file["pose"]}
+                a = {
+                    "arm_left": arm_left,
+                    "arm_right": arm_right,
+                    "leg_left": leg_left,
+                    "leg_right": leg_right,
+                    "pose": file["pose"],
+                }
 
                 x.append(a)
 
-                print(f'{idx} / {__len - 1}')
+                print(f"{idx} / {__len - 1}")
                 if not self == None:
                     # self.preprocess_list.appendPlainText(f"img : {file['image']} ")
                     self.progressbar_pre.setValue(idx)
@@ -195,15 +249,15 @@ def img_media(self=None, img_path=None, csv_path="./data.csv", json_path="./pose
     now = time
 
     try:
-        with open(json_path, 'w') as outfile:
+        with open(json_path, "w") as outfile:
             json.dump(x, outfile)
             now = now.strftime("%Y %m %d %H %M %S")
 
-            self.preprocess_list.appendPlainText(
-                f"json 파일 저장됨 : {json_path} {now}")
+            self.preprocess_list.appendPlainText(f"json 파일 저장됨 : {json_path} {now}")
     except:
         return -1
 
     return 1
+
 
 # img_media()

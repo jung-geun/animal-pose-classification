@@ -7,8 +7,16 @@ from threading import Thread
 import time
 import sys
 
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QToolTip, QDesktopWidget, QVBoxLayout, QHBoxLayout, QLabel, QFileDialog, QProgressBar, QMainWindow, QMessageBox
-from PyQt5.QtGui import QFont, QIcon, QPixmap
+from PyQt5.QtWidgets import (
+    QApplication,
+    QPushButton,
+    QLabel,
+    QProgressBar,
+    QMainWindow,
+    QMessageBox,
+    QToolTip,
+)
+from PyQt5.QtGui import QFont, QPixmap
 from PyQt5 import uic
 
 form_class = uic.loadUiType("./gui.ui")[0]
@@ -29,8 +37,8 @@ class MyApp(QMainWindow, form_class):
         self.show()
 
     def initUI(self):
-        QToolTip.setFont(QFont('SansSerif', 10))
-        self.setWindowTitle('yoga posture detection')
+        QToolTip.setFont(QFont("SansSerif", 10))
+        self.setWindowTitle("yoga posture detection")
 
         self.tabWidget.setTabText(0, "Preprocessing")
         self.tabWidget.setTabText(1, "Training")
@@ -48,24 +56,30 @@ class MyApp(QMainWindow, form_class):
 
         self.video_start.clicked.connect(self.video_start_click)
         self.video_stop.clicked.connect(self.video_stop_click)
-        
+
         self.radio_cam_0.clicked.connect(self.cam0Click)
         self.radio_cam_1.clicked.connect(self.cam1Click)
 
         self.show()
 
     def closeEvent(self, event):
-        reply = QMessageBox.question(self, 'Message', 'Are you sure to quit?',
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        reply = QMessageBox.question(
+            self,
+            "Message",
+            "Are you sure to quit?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
 
         if reply == QMessageBox.Yes:
+            self.flag = 1
             event.accept()
         else:
             event.ignore()
 
     def dataClick(self):
         vp.get_csv()
-        
+
     def preClick(self):
         print("버튼이 클릭되었습니다.")
 
@@ -104,14 +118,15 @@ class MyApp(QMainWindow, form_class):
         self.flag = 1
         print("video stop")
         # self.label.clear()
-    
+
     def cam0Click(self):
         self.cam = 0
-        
+
     def cam1Click(self):
         self.cam = 1
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MyApp()
     app.exec_()

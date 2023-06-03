@@ -12,28 +12,11 @@ from sklearn.linear_model import SGDClassifier, LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm, tree
 
-
-def cal_rad(arr):
-    rad = []
-
-    a = math.atan2(arr["x"][0] - arr["x"][1], arr["y"][0] - arr["y"][1]) - \
-        math.atan2(arr["x"][1] - arr["x"][2], arr["y"][1] - arr["y"][2])
-    # print(a)
-    rad.append(a)
-    b = math.atan2(arr["x"][1] - arr["x"][2], arr["y"][1] - arr["y"][2]) - \
-        math.atan2(arr["x"][2] - arr["x"][3], arr["y"][2] - arr["y"][3])
-    rad.append(b)
-
-    PI = math.pi
-
-    deg = [(rad[0]*180)/PI, (rad[1]*180)/PI]
-    # print(deg[0])
-
-    return deg
+from cal_rad import cal_rad
 
 
 def get_data():
-    data = pd.read_json('pose.json')
+    data = pd.read_json("pose.json")
     print(data.info())
     meta_x = []
 
@@ -41,8 +24,16 @@ def get_data():
     # 인식 가능한 자료형으로 변환
     for row in data.iloc:
         # print(row["arm_left"])
-        deg = [cal_rad(row["arm_left"])[0], cal_rad(row["arm_left"])[1], cal_rad(row["arm_right"])[0], cal_rad(row["arm_right"])[
-            1], cal_rad(row["leg_left"])[0], cal_rad(row["leg_left"])[1], cal_rad(row["leg_right"])[0], cal_rad(row["leg_right"])[1]]
+        deg = [
+            cal_rad(row["arm_left"])[0],
+            cal_rad(row["arm_left"])[1],
+            cal_rad(row["arm_right"])[0],
+            cal_rad(row["arm_right"])[1],
+            cal_rad(row["leg_left"])[0],
+            cal_rad(row["leg_left"])[1],
+            cal_rad(row["leg_right"])[0],
+            cal_rad(row["leg_right"])[1],
+        ]
         # deg.append(cal_rad(row["arm_right"]))
         # deg.append(cal_rad(row["leg_left"]))
         # deg.append(cal_rad(row["leg_right"]))
@@ -56,7 +47,8 @@ def get_data():
     # print(y.shape)
 
     x_train, x_test, y_train, y_test = model_selection.train_test_split(
-        x, y, test_size=0.1)
+        x, y, test_size=0.1
+    )
     # print(x_train.shape)
     # print(y_train.shape)
     print(x_test.shape)
@@ -64,11 +56,11 @@ def get_data():
 
     return x_train, x_test, y_train, y_test
 
+
 # get_data()
 
 
 def make_model(sel="forest"):
-
     if sel == "svc":
         model = svm.SVC()
     elif sel == "tree":
@@ -83,6 +75,7 @@ def make_model(sel="forest"):
     print(model)
 
     return model
+
 
 # make_model()
 
@@ -128,7 +121,7 @@ def do_train(self=None):
             os.mkdir("./model")
     except:
         print("Error: 폴더 생성 실패")
-        
+
     try:
         with open(f"./model/model_{self.model}.pkl", "wb") as f:
             pickle.dump(model, f)
@@ -137,5 +130,6 @@ def do_train(self=None):
     except:
         print("모델 저장 실패")
         return -1
+
 
 # do_train()
