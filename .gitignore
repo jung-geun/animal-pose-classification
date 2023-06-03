@@ -9,9 +9,9 @@ videos/
 out/
 ha/
 dog1/
-model/
-study/
+model/random_forest/*.pkl
 
+study/
 # 학습할 데이터
 label
 data
