@@ -1,0 +1,30 @@
+__pycache__/
+*.py[cod]
+
+# jupyter notebook
+.ipynb_checkpoints/
+
+# 프로젝트 생성파일
+videos/
+out/
+ha/
+dog1/
+model/
+study/
+
+# 학습할 데이터
+label
+data
+
+*.pdf
+
+# 에디터 생성 파일
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
