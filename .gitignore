@@ -11,7 +11,10 @@ ha/
 dog1/
 model/random_forest/*.pkl
 
+_mina/data/
+_mina/project/
 study/
+
 # 학습할 데이터
 label
 data
@@ -28,3 +31,5 @@ data
 *.njsproj
 *.sln
 *.sw?
+
+행동분류 개발 모델(유니스트)/
