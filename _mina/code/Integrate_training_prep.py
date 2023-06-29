@@ -12,8 +12,15 @@ from tqdm import tqdm
     
     main() 함수를 실행하면, AI-Hub 데이터셋을 활용하여 DeepLabCut을 학습시키는 과정을 진행한다.
 """
+import tensorflow as tf
 
-
+gpus = tf.config.experimental.list_physical_devices("GPU")
+if gpus:
+    try:
+        # tf.config.experimental.set_visible_devices(gpus[0], "GPU")
+        tf.config.experimental.set_memory_growth(gpus[0], True)
+    except RuntimeError as e:
+        print(e)
 
 def frames_to_video(src_path, dataset, pbar):
     """
@@ -291,7 +298,7 @@ def convert_csv(config_path, scorer, pbar):
 
 
 ## https://github.com/DeepLabCut/DeepLabCut/blob/main/deeplabcut/gui/tabs/create_training_dataset.py#L84 
-def train(config_path, vdos, pbar, destfolder):
+def train(config_path, vdos, pbar, destfolder=None):
     """
         Train a network for a project.
 
@@ -465,7 +472,8 @@ def main():
     print('total : ', total)
 
     start(project, scorer, working_directory, src_path, lab_path, dataset, destfolder=None)
-main()
+# main()
+deeplabcut.evaluate_network('/home/dlc/DLC/_mina/project/preLabeled-test01-2023-06-29/config.yaml',Shuffles=[1],plotting=True)
 
 
 
