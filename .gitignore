@@ -6,6 +6,7 @@ __pycache__/
 
 # 프로젝트 생성파일
 videos/
+videos2/
 out/
 ha/
 dog1/
@@ -16,10 +17,11 @@ _mina/project/
 study/
 
 # 학습할 데이터
-label
-data
+label*
+data*
 
 *.pdf
+*.hwp
 
 # 에디터 생성 파일
 .vscode/*
@@ -33,3 +35,5 @@ data
 *.sw?
 
 행동분류 개발 모델(유니스트)/
+Zoo/
+model/

@@ -35,3 +35,4 @@
 ├── README.md
 ```
 
+결과 값  likehood 엑셀 서치 ( =MATCH(1, AT4:AT99, 1) )
