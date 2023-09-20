@@ -12,7 +12,6 @@ print(tf.test.gpu_device_name())
 gpus = tf.config.experimental.list_physical_devices("GPU")
 if gpus:
     try:
-        # tf.config.experimental.set_visible_devices(gpus[0], "GPU")
         tf.config.experimental.set_memory_growth(gpus[0], True)
     except RuntimeError as e:
         print(e)
@@ -23,415 +22,456 @@ import pickle
 import matplotlib.pyplot as plt  # 데이터 시각화
 import natsort
 import numpy as np
-import xgboost as xgb
-from keras.optimizers import Adam
-from sklearn import preprocessing
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+from keras.layers import (
+    GRU,
+    LSTM,
+    Conv2D,
+    Dense,
+    Dropout,
+    Flatten,
+    MaxPooling2D,
+    Conv1D,
+    MaxPooling1D,
+    TimeDistributed,
+)
+from keras.models import Sequential
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder
 from tensorflow import keras
-from tensorflow.keras import layers
-from tensorflow.keras.layers import GRU, LSTM, Dense, Dropout, Embedding, Input
-from tensorflow.keras.models import Model
-from tqdm import tqdm
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from tqdm.auto import tqdm
 
 from angle_out import out
 
-# tf.keras.backend.clear_session()
 
-
-def make_lstm():
-    model = keras.Sequential()
-    model.add(
-        layers.LSTM(4, activation="relu", input_shape=(4, 1), return_sequences=True)
-    )
-    model.add(layers.Dropout(0.2))
-    model.add(layers.LSTM(14, activation="relu", return_sequences=False))
-    # model.add(layers.Dense(16, activation='relu'))
-    model.add(layers.Dense(3, activation="softmax"))
-
-    model.compile(optimizer="adam", loss="mse", metrics=["accuracy"])
-
-    return model
-
-
-def make_gru():
-    model = keras.Sequential()
-    model.add(
-        layers.GRU(
-            4, activation="relu", input_shape=(4, 1), dropout=0.2, return_sequences=True
-        )
-    )
-    # model.add(layers.Dropout(0.2))
-    model.add(layers.GRU(14, activation="relu", return_sequences=False))
-    model.add(layers.Dense(3, activation="softmax"))
-
-    model.compile(optimizer="adam", loss="mse", metrics=["accuracy"])
-
-    return model
-
-
-def make_random_forest(
-    n_estimators=100, max_depth=10, min_samples_split=2, random_state=0
-):
-    model = RandomForestClassifier(
-        n_estimators=n_estimators,
-        max_depth=max_depth,
-        min_samples_split=min_samples_split,
-        random_state=random_state,
-    )
-    return model
-
-
-def make_xgboost():
-    model = xgb.XGBClassifier()
-
-    return model
-
-
-# %%
-# meta_data = []
-data = []
-label = []
-window = 4
-
-path = "./data"
-label_path = "./label"
-
-with open("Zoo/config.yaml") as f:
-    conf_yaml = yaml.load(f, Loader=yaml.FullLoader)
-
-    # print(conf_yaml["bodyparts"])
-    bodyparts = []
-    for part in conf_yaml["bodyparts"]:
-        bodyparts.append(part)
-
+body_parts = [
+    "Nose",
+    "Forehead",
+    "MouthCorner",
+    "LowerLip",
+    "Neck",
+    "RightArm",
+    "LeftArm",
+    "RightWrist",
+    "LeftWrist",
+    "RightFemur",
+    "LeftFemur",
+    "RightAnkle",
+    "LeftAnkle",
+    "TailStart",
+    "TailTip",
+]
 
 label_parts = [
-    ["nose", "neck_base", "neck_end"],
-    ["neck_base", "neck_end", "back_base"],
-    ["neck_end", "back_base", "back_middle"],
-    ["back_base", "back_middle", "back_end"],
-    ["back_middle", "back_end", "tail_base"],
-    ["back_end", "tail_base", "tail_end"],
-    ["back_base", "front_left_thai", "front_left_knee"],
-    ["front_left_thai", "front_left_knee", "front_left_paw"],
-    ["back_base", "front_right_thai", "front_right_knee"],
-    ["front_right_thai", "front_right_knee", "front_right_paw"],
-    ["back_end", "back_left_thai", "back_left_knee"],
-    ["back_left_thai", "back_left_knee", "back_left_paw"],
-    ["back_end", "back_right_thai", "back_right_knee"],
-    ["back_right_thai", "back_right_knee", "back_right_paw"],
+    ["Nose", "MouthCorner", "LowerLip"],
+    ["LowerLip", "Nose", "Forehead"],
+    ["Nose", "Forehead", "Neck"],
+    ["Forehead", "Neck", "TailStart"],
+    ["Neck", "TailStart", "TailTip"],
+    ["Forehead", "Neck", "RightArm"],
+    ["Neck", "RightArm", "RightWrist"],
+    ["Forehead", "Neck", "LeftArm"],
+    ["Neck", "LeftArm", "LeftWrist"],
+    ["Neck", "TailStart", "RightFemur"],
+    ["Neck", "RightFemur", "RightAnkle"],
+    ["Neck", "TailStart", "LeftFemur"],
+    ["Neck", "LeftFemur", "LeftAnkle"],
 ]
-iii = 0
-
-# print("data")
-
-for data_list in natsort.natsorted(os.listdir(path)):
-    if data_list == "TEST":
-        continue
-    elif "_DLC" in data_list:
-        continue
-    elif "_bak" in data_list:
-        continue
-    elif not os.path.isdir(f"{path}/{data_list}"):
-        continue
-    print(f"{path}/{data_list} > ")
-
-    delta = f"{path}/{data_list}"
-    for label_list in natsort.natsorted(os.listdir(delta)):
-        iii += 1
-        # _json_ = label_list
-        # delta_np = f"{delta}/{delta_list}/{delta_list}.npy"
-        delta_label = f"{label_path}/{data_list}/{label_list}.json"
-        # delta_label = f"{delta}/{delta_list}/{delta_list}.json"
-
-        # print(f"{delta_label} > ")
-
-        keypoints = []
-
-        if not os.path.exists(delta_label):
-            continue
-
-        with open(delta_label, "r") as label_json:
-            label_tmp = json.load(label_json)
-            for annotation in label_tmp["annotations"]:
-                # frame = annotation['frame_number']
-                # timestamp = annotation['timestamp']
-                key = annotation["keypoints"]
-                # print(keypoint)
-                # if keypoint == None:
-                # keypoint['x'] = 0
-                # keypoint['y'] = 0
-                # print(annotation['keypoints'])
-                # if None in key:
-                # print(key)
-                for val in key:
-                    # print(val)
-                    if key[val] == None:
-                        key[val] = {"x": 0, "y": 0}
-                keypoints.append(key)
-                # print(keypoints)
-            # x_tmp = json.load(label_json)["annotations"][]["keypoints"]
-
-        # print(len(data))
-        # print(len(label))
-        # print(label_tmp)
-
-        # np_tmp = np.load(delta_np)
-        tmp = np.array(keypoints)
-        # print(tmp[0])
-
-        # print(tmp[0].shape)
-        meta_data = []
-        # angle_arr = []
-        for data_index in tmp:
-            # print(data_index)
-            data_tmp = []
-            for index in data_index:
-                # print(data_index[index])
-                data_tmp.append(data_index[index])
-            # angle = out(inputs = data_index, keypoint= keypoint, label_parts = label_parts)
-            # angle_arr.append(angle)
-        meta_data.append(np.array(data_tmp))
-        # print(data_tmp)
-
-        angle_arr = []
-        # print(meta_data)
-        for i in range(len(meta_data)):
-            angle = out(inputs=meta_data[i], bodyparts=bodyparts, label_parts=label_parts)
-            angle_arr.append(angle)
-
-        # print(angle_arr)
-        # print(f"window {window}")
-        # print(f"len {len(meta_data)}")
-        # print(f"data > {meta_data[0]}")
-        # print(f"angle > {angle_arr}")
-        np_tmp = []
-        for index in range(window, len(angle_arr[0])):
-            tmp_wind = angle_arr[0][index - window : index]
-
-            data.append(tmp_wind)
-            np_tmp.append(tmp_wind)
-            label.append(data_list)
-
-        np_save = f"{label_path}/{data_list}/{label_list}.npy"
-        np.save(np_save, np_tmp)
-        # label.append(data_list)
 
 
-# print(f"count = {iii}")
+def make_lstm(window=10):
+    model = Sequential()
+    model.add(LSTM(256, input_shape=(window, len(label_parts)), return_sequences=True))
+    model.add(Dropout(0.3))
+    model.add(LSTM(128, return_sequences=True))
+    model.add(Dropout(0.3))
+    # model.add(Flatten())
+    model.add(LSTM(64, return_sequences=False))
+    model.add(Dropout(0.2))
+    model.add(Dense(64, activation="relu"))
+    model.add(Dense(13, activation="softmax"))
 
-# print(f" {len(data)}")
-# print(len(label))
-
-# angle_arr = []
-# data_t = []
-
-
-# print(meta_data[index])
-# print(label[index])
-# for i in range(len(data[index])):
-# print(data[index])
-# angle = out(inputs = meta_data[index], keypoint= keypoint, label_parts = label_parts)
-# data_t.append(angle)
-
-# for index in range(window,len(np_tmp)):
-#     data.append(angle_arr[index-window:index])
-#     label.append(label_tmp)
-
-# print(f"shape > {np.shape(data)}")
-print(f"data sample > {data[0]}")
-# angle_arr = []
-# for i in range(len(np_tmp)):
-#     angle = out(inputs = np_tmp[i])
-#     angle_arr.append(angle)
-
-#     for index in range(window,len(np_tmp)):
-#         data.append(angle_arr[index-window:index])
-#         label.append(label_tmp)
-
-# print(np.shape(data))
-x_train = np.array(data)
-# x_train = x_train.reshape(-1,4,10)
-y_train = np.array(label)
-
-print(f"x shape > {x_train.shape}")
-print(f"y shape > {y_train.shape}")
-
-# %%
-word_to_index = {
-    "BODYLOWER": 0,
-    "BODYSCRATCH": 1,
-    "BODYSHAKE": 2,
-    "FOOTUP": 3,
-    "HEADING": 4,
-    "LYING": 5,
-    "MOUNTING": 6,
-    "SIT": 7,
-    "TURN": 8,
-}
-
-
-def convert_word_to_index(word_to_index, sentences):
-    arr = []
-    for i in range(len(sentences)):
-        arr.append(word_to_index[sentences[i]])
-    arr = np.array(arr)
-    return arr
-
-
-def one_hot_encoding(words, word_to_index):
-    ohv = []
-    for word in words:
-        one_hot_vector = [0] * (len(word_to_index))
-        index = word_to_index[word]
-        one_hot_vector[index] = 1
-        ohv.append([one_hot_vector])
-    ret = np.array(ohv)
-    return ret
-
-
-# y_tmp = tf.one_hot(y_train, 3, on_value=1.0, off_value=0.0)
-
-# y_tmp = one_hot_encoding(y_train, word_to_index)
-# y_tmp = convert_word_to_index(word_to_index, y_train)
-y_tmp = tf.one_hot(y_train, 13, on_value=1.0, off_value=0.0)
-# y_tmp = y_tmp.reshape(-1,1,3)
-
-# print(y_train.shape)
-print(y_tmp.shape)
-# print(x_train[0])
-# print(y_tmp[1000])
-
-# %%
-# np_data = np.load('./out/coco_train02.npy')
-# print(np_data.shape)
-# print(np_data[19])
-# print(data[0])
-
-# window = 4
-# arr =[]
-
-# model = lstm()
-max_depth = 45
-n_estimators = 25
-
-x_train = x_train.reshape(-1, 4)
-
-
-def random_forest():
-    model = make_random_forest(
-        max_depth=max_depth, n_estimators=n_estimators, random_state=0
+    model.compile(
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
     )
-    print(x_train.shape, y_tmp.shape)
-    model.fit(x_train, y_tmp)
-    model_params = model.get_params()
-    print(model_params)
-    pickle.dump(model, open(f"./out/rf_{max_depth}_{n_estimators}.pkl", "wb"))
-
-    return model
-
-
-def lstm():
-    model = make_lstm()
-
-    # model.compile(loss='binary_crossentropy',
-    # optimizer='rmsprop',
-    # metrics=['accuracy'])
-    # model.compile(loss='mse', optimizer=Adam(0.01))
 
     print(model.summary())
 
-    model.fit(x_train, y_tmp, batch_size=1, epochs=40, verbose=1)
+    return model
+
+
+def make_gru(window=10):
+    model = Sequential()
+    model.add(
+        GRU(
+            256,
+            input_shape=(window, len(label_parts)),
+            dropout=0.3,
+            return_sequences=True,
+        )
+    )
+    model.add(GRU(128, dropout=0.25, return_sequences=True))
+    model.add(GRU(64, dropout=0.25, return_sequences=False))
+    # model.add(Dense(128, activation="relu"))
+    # model.add(Dropout(0.2))
+    model.add(Dense(64, activation="relu"))
+    model.add(Dense(13, activation="softmax"))
+
+    model.compile(
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+    )
+
+    print(model.summary())
 
     return model
 
 
-def gru():
-    model = make_gru()
+def make_cnn2d(window=10):
+    model = Sequential()
+    model.add(
+        Conv2D(
+            32,
+            kernel_size=(3, 3),
+            activation="relu",
+            input_shape=(window, len(label_parts), 1),
+        )
+    )
+    model.add(Conv2D(64, (3, 3), activation="relu"))
+    model.add(MaxPooling2D(pool_size=2))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(128, activation="relu"))
+    model.add(Dense(13, activation="softmax"))
 
-    model.fit(x_train, y_tmp, batch_size=1, epochs=40, verbose=1)
+    model.compile(
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+    )
+
+    print(model.summary())
 
     return model
 
 
-# x_train=np.array(x_train) # (16,4,5,2) -> (16,4,10,1)
+def make_cnn1d(window=10):
+    model = Sequential()
+    model.add(
+        Conv1D(
+            192,
+            kernel_size=6,
+            activation="relu",
+            input_shape=(window, len(label_parts)),
+        )
+    )
+    model.add(Conv1D(128, kernel_size=3, activation="relu"))
+    model.add(MaxPooling1D(pool_size=2))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(128, activation="relu"))
+    model.add(Dense(64, activation="relu"))
+    model.add(Dense(13, activation="softmax"))
 
-# x_train = x_train.reshape(-1, x_train.shape[1],x_train.shape[2], 1)
+    model.compile(
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+    )
 
-# print(x_train[0])
-# print(y_tmp[0])
+    print(model.summary())
 
-# model.fit(x_train, y_tmp, batch_size=1 , epochs=40, verbose=1)
+    return model
 
-# model.save('lstm_model.h5')
-# model.save
-# print("모델 저장 완려") #려~
 
-# pred = model.predict(x_train) # 테스트 데이터 예측
+def make_cnn_lstm(window=10):
+    model = Sequential()
+    model.add(
+        Conv1D(
+            192,
+            kernel_size=4,
+            activation="relu",
+            input_shape=(window, len(label_parts)),
+        )
+    )
+    model.add(MaxPooling1D(pool_size=2))
+    model.add(Dropout(0.25))
+    # model.add(Flatten())
+    model.add(LSTM(128, dropout=0.3, return_sequences=True))
+    model.add(LSTM(64, dropout=0.2, return_sequences=False))
+    model.add(Dense(13, activation="softmax"))
 
-# fig = plt.figure(facecolor='white')
-# ax = fig.add_subplot(111)
-# ax.plot(y_train, label='True')
-# ax.plot(pred, label='Prediction')
-# ax.legend()
-# plt.show()
+    model.compile(
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+    )
 
-# model = random_forest()
-# model = lstm()
-model = gru()
+    print(model.summary())
+
+    return model
+
 
 # %%
-# with open(delta_label, "r") as label_json:
-# label_tmp = json.load(label_json)[0]["pose"]
+# 윈도우 사이즈에 맞추어서 저장할 공간
+# 초당 5개 제한 2초동안 10개
 
-# model = keras.models.load_model('lstm_model.h5')
-# lenght = len(x_train)
-# faild = 0
-# fail_list = []
-# for i in tqdm(range(lenght), desc=f"오차 {faild/lenght}", mininterval=1):
-#     x_tmp = [x_train[i]]
-#     y_pred = model.predict(x_tmp)
-#     if y_pred != y_tmp[i]:
-#         faild += 1
-#         print(f"실패 > {faild}/{i}")
-#         fail_list.append(i)
+path = "./label"
+label_path = "./_mina/data/AI-Hub/poseEstimation/Validation/DOG"
 
-# print(f"성공률 > {(1-faild/lenght)*100}")
-
-
-def score_check():
-    score = model.score(x_train, y_tmp)
-
-    print(f"score > {score}")
-    print(f"model accuracy score > {accuracy_score(y_tmp, model.predict(x_train))}")
-
-    import time
-
-    start = time.time()
-    y_pred = model.predict([x_train[0]])
-    # model.
-    run_time = time.time() - start
-    print(f"predict time > {run_time}")
-
-    params = model.get_params()
-
-    params["score"] = score
-    params["pred_time"] = run_time
-    # json_data = json.dumps(params)
-    with open(f"./model/depth_{max_depth}_{n_estimators}.json", "w") as json_file:
-        json.dump(params, json_file)
+# body_parts = [
+#     "Nose",
+#     "Forehead",
+#     "MouthCorner",
+#     "LowerLip",
+#     "Neck",
+#     "RightArm",
+#     "LeftArm",
+#     "RightWrist",
+#     "LeftWrist",
+#     "RightFemur",
+#     "LeftFemur",
+#     "RightAnkle",
+#     "LeftAnkle",
+#     "TailStart",
+#     "TailTip",
+# ]
 
 
-# print(f"실패한 갯수 > {faild/len(x_train)}")
-# print(f"{x_train[0]}")
+# frontRightView = ["RightWrist", "RightArm", "Nose"]
+# frontLeftView = ["LeftWrist", "LeftArm", "Nose"]
+# backRightView = ["TailTip", "RightFemur", "RightAnkle"]
+# backLeftView = ["TailTip", "LeftFemur", "LeftAnkle"]
+# frontRightTilt = ["Neck", "RightWrist", "TailStart"]
+# frontLeftTilt = ["Neck", "LeftWrist", "TailStart"]
+# backRightTilt = ["Neck", "TailStart", "RightAnkle"]
+# backLeftTilt = ["Neck", "TailStart", "LeftAnkle"]
+# frontRight = ["Neck", "RightArm", "RightWrist"]
+# frontLeft = ["Neck", "LeftArm", "LeftWrist"]
+# backRight = ["TailStart", "RightFemur", "RightAnkle"]
+# backLeft = ["TailStart", "LeftFemur", "LeftAnkle"]
+# frontBody = ["Nose", "Neck", "TailStart"]
+# backBody = ["Neck", "TailStart", "TailTip"]
+# mouth = ["Nose", "MouthCorner", "LowerLip"]
+# head = ["Nose", "Forehead", "Neck"]
+# tail = ["TailTip", "TailStart", "LeftAnkle"] or ["TailTip", "TailStart", "RightAnkle"]
+# direction = ["Nose", "RightArm", "RightFemur"] or ["Nose", "LeftArm", "LeftFemur"]
+
+# label_parts = [
+#     frontRightView,
+#     frontLeftView,
+#     backRightView,
+#     backLeftView,
+#     frontRightTilt,
+#     frontLeftTilt,
+#     backRightTilt,
+#     backLeftTilt,
+#     frontRight,
+#     frontLeft,
+#     backRight,
+#     backLeft,
+#     frontBody,
+#     backBody,
+#     mouth,
+#     head,
+#     tail,
+#     direction,
+# ]
 
 
-# y_pred = model.predict(x_tmp)
-# print(f"예상치 > {y_pred}")
-# print(f"실제값 > {y_tmp[0]}")
+def make_data(window=10):
+    print("make data")
+    print(f"label_path > {label_path}")
+    out_dir = f"./label{window}_{len(label_parts)}"
+    for list_ in tqdm(
+        natsort.natsorted(os.listdir(label_path)), desc="label", leave=True, position=0
+    ):
+        if list_[:5] == "label":
+            label_list = f"{label_path}/{list_}/json"
+            # print(label_list)
+            for l in tqdm(
+                natsort.natsorted(os.listdir(label_list)),
+                desc=list_[5:],
+                leave=True,
+                position=1,
+            ):
+                keypoints = []
 
-# score_check()
+                with open(f"{label_list}/{l}") as label_json:
+                    label_tmp = json.load(label_json)
+                    for annotation in label_tmp["annotations"]:
+                        key = annotation["keypoints"]
+                        for val in key:
+                            # print(val)
+                            if key[val] == None:
+                                key[val] = {"x": 0, "y": 0}
+                        keypoints.append(key)
+                tmp = np.array(keypoints)
+                meta_data = []
+                for data_index in tmp:
+                    data_tmp = []
+                    for index in data_index.values():
+                        data_tmp.append(index)
+                    meta_data.append(np.array(data_tmp))
+
+                angle_arr = []
+                for m_d in meta_data:
+                    angle = out(
+                        inputs=m_d, body_parts=body_parts, label_parts=label_parts
+                    )
+                    angle_arr.append(angle)
+                np_tmp = []
+                for index in range(window, len(angle_arr)):
+                    tmp_wind = angle_arr[index - window : index]
+
+                    np_tmp.append(tmp_wind)
+                os.makedirs(f"{out_dir}/{list_[5:]}", exist_ok=True)
+                file_name = l.split(".")[0]
+                np_save = f"{out_dir}/{list_[5:]}/{file_name}.npy"
+                np.save(np_save, np_tmp)
+
 
 # %%
+
+
+def load_data(window=10):
+    print("load data")
+
+    out_dir = f"./label{window}_{len(label_parts)}"
+
+    if not os.path.isdir(out_dir):
+        make_data(window)
+
+    x_data = []
+    y_data = []
+
+    for label_list in tqdm(
+        natsort.natsorted(os.listdir(out_dir)), desc="label", position=0
+    ):
+        # print(label_list)
+        for np_list in tqdm(
+            natsort.natsorted(os.listdir(f"{out_dir}/{label_list}")),
+            desc=label_list,
+            position=1,
+        ):
+            np_tmp = np.load(f"{out_dir}/{label_list}/{np_list}")
+            for tmp in np_tmp:
+                x_data.append(tmp)
+                y_data.append(label_list)
+
+    x_data = np.array(x_data) / 180.0
+    y_data = np.array(y_data)
+
+    if not os.path.exists("model/onehot_encoder.pkl"):
+        encoder = OneHotEncoder(sparse=False)
+        y_one_hot = encoder.fit_transform(y_data.reshape(-1, 1))
+        pickle.dump(encoder, open("model/onehot_encoder.pkl", "wb"))
+    else:
+        encoder = pickle.load(open("model/onehot_encoder.pkl", "rb"))
+        y_one_hot = encoder.transform(y_data.reshape(-1, 1))
+
+    x_train, x_test, y_train, y_test = train_test_split(
+        x_data, y_one_hot, test_size=0.3, shuffle=True
+    )
+
+    return x_train, x_test, y_train, y_test
+
+
+# %%
+
+
+def score_check(model_name="LSTM", window=10, verbose=1):
+    """
+    학습 및 점수 체크
+    """
+    print("score check")
+    try:
+        model_name = model_name.upper()
+        model_list = ["LSTM", "GRU", "CNN", "CNN2D", "CNN_LSTM"]
+        if model_name not in model_list:
+            raise ValueError("model_name must be LSTM, GRU, CNN, CNN2D, CNN_LSTM")
+    except ValueError as e:
+        print(e)
+        return
+
+    x_train, x_test, y_train, y_test = load_data(window)
+
+    verbose = verbose
+    dir_name = f"model/{model_name}_{window}_{len(label_parts)}"
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name, exist_ok=True)
+
+    early_stopping = EarlyStopping(
+        monitor="val_loss",
+        patience=10,
+        verbose=verbose,
+        mode="auto",
+        restore_best_weights=True,
+    )
+    model_checkpoint = ModelCheckpoint(
+        f"{dir_name}/best_model.h5",
+        monitor="val_loss",
+        verbose=verbose,
+        save_best_only=True,
+    )
+    callbacks = [early_stopping, model_checkpoint]
+
+    try:
+        if model_name == "LSTM":
+            model = make_lstm(window)
+        elif model_name == "GRU":
+            model = make_gru(window)
+        elif model_name == "CNN2D":
+            model = make_cnn2d(window)
+        elif model_name == "CNN":
+            model = make_cnn1d(window)
+        elif model_name == "CNN_LSTM":
+            model = make_cnn_lstm(window)
+
+        history = model.fit(
+            x_train,
+            y_train,
+            batch_size=64,
+            epochs=200,
+            verbose=verbose,
+            callbacks=callbacks,
+            validation_data=(x_test, y_test),
+        )
+        model.save(f"{dir_name}/model.h5")
+
+    except KeyboardInterrupt:
+        print("KeyboardInterrupt")
+        return
+    except Exception as e:
+        print(e)
+        return
+
+    finally:
+        pickle.dump(history.history, open(f"{dir_name}/history.pkl", "wb"))
+
+        fig, ax1 = plt.subplots()
+        (line1,) = ax1.plot(
+            history.history["accuracy"], label="train_acc", color="blue"
+        )
+        (line2,) = ax1.plot(
+            history.history["val_accuracy"], label="val_acc", color="green"
+        )
+        ax1.set_ylabel("accuracy")
+        ax2 = ax1.twinx()
+
+        (line3,) = ax2.plot(history.history["loss"], label="train_loss", color="red")
+
+        (line4,) = ax2.plot(
+            history.history["val_loss"], label="val_loss", color="orange"
+        )
+        ax2.set_ylabel("loss")
+
+        plt.title("model history")
+        plt.xlabel("epochs")
+
+        legend1 = plt.legend(handles=[line1, line2], loc="upper right")
+        plt.gca().add_artist(legend1)
+        legend2 = plt.legend(handles=[line3, line4], loc="lower right")
+        plt.gca().add_artist(legend2)
+        plt.savefig(f"{dir_name}/model_history.png")
+
+
+# for w in [10, 12, 15, 20]:
+#     for model in ["LSTM", "GRU", "CNN", "CNN2D", "CNN_LSTM"]:
+#         score_check(model_name=model, window=w)
+
+for w in [5, 10, 15, 20]:
+    score_check("lstm", window=w)

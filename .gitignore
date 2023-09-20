@@ -36,4 +36,21 @@ data*
 
 행동분류 개발 모델(유니스트)/
 Zoo/
-model/
+# model/
+model/GRU*
+model/CNN2D*
+model/CNN_LSTM*
+model/pre*
+논문 중간/
+runs/
+test/
+train/
+valid/
+
+*.pt
+
+README.roboflow.txt
+README.dataset.txt
+*.png
+*.jpg
+plt.ipynb

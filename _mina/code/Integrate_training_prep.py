@@ -321,6 +321,7 @@ def json_to_csv(scorer, src_path, lab_path, conclusion_path, dataset, pbar):
     pbar.write("--- json to csv end ---")
 
 
+
 ## https://github.com/DeepLabCut/DeepLabCut/blob/main/deeplabcut/utils/conversioncode.py#L30
 def convert_csv(config_path, scorer, pbar):
     """
@@ -531,7 +532,7 @@ def main():
     data_path = "/home/dlc/DLC/_mina/data/AI-Hub/poseEstimation/Validation/DOG"
     working_directory = "/home/dlc/DLC/_mina/project"
     destfolder = "/home/dlc/DLC/_mina"
-    action = ["SIT", "BODYLOWER", "WALKRUN"]
+    action = ["SIT", "BODYLOWER", "WALKRUN", "BODYSCRATCH", "BODYSHAKE",""]
 
     print("\n\n")
     src_path = []
