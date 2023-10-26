@@ -9,13 +9,22 @@ def Angle(arr) -> float:
     # 앵글을 계산하는 함수
     ## 3개의 점을 받아서 앵글을 계산한다.
     """
-    a = np.arctan2(arr[0]["x"] - arr[1]["x"], arr[0]["y"] - arr[1]["y"]) - np.arctan2(
-        arr[1]["x"] - arr[2]["x"], arr[1]["y"] - arr[2]["y"]
-    )
+    a = {"x": arr[0]["x"], "y": arr[0]["y"]}
+    b = {"x": arr[1]["x"], "y": arr[1]["y"]}
+    c = {"x": arr[2]["x"], "y": arr[2]["y"]}
+    # seta1 = np.arctan((a["x"] - b["x"]) / (a["y"] - b["y"]))
+    # seta2 = np.arctan((c["x"] - b["x"]) / (c["y"] - b["y"]))
+    seta1 = np.arctan2(a["x"] - b["x"], a["y"] - b["y"])
+    seta2 = np.arctan2(c["x"] - b["x"], c["y"] - b["y"])
+    
+    seta = seta1 - seta2
+    # a = np.arctan2(arr[0]["x"] - arr[1]["x"], arr[0]["y"] - arr[1]["y"]) - np.arctan2(
+        # arr[1]["x"] - arr[2]["x"], arr[1]["y"] - arr[2]["y"]
+    # )
 
     PI = np.pi
 
-    deg = float((a * 180) / PI)
+    deg = float((seta * 180) / PI)
     return deg
 
 

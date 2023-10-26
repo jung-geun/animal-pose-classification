@@ -1,5 +1,5 @@
 import cv2
-
+import os
 import numpy as np
 import yaml
 import pickle
@@ -11,11 +11,22 @@ from tensorflow import keras
 from tensorflow.keras.models import load_model
 from data_sensor import get_img_coord, ini_DLC
 
-pose_cfg, cfg = (
-    "model/preLabeled_type(Labrador_Retriever)-test01-2023-09-19/dlc-models/iteration-0/preLabeled_type(Labrador_Retriever)Sep19-trainset95shuffle1/train/pose_cfg.yaml",
-    "model/preLabeled_type(Labrador_Retriever)-test01-2023-09-19/config.yaml",
+project_path = "model/dog_-_77503 (720p)-1-2023-10-24"
+
+pose_config_path_iter = f"{project_path}/dlc-models/iteration-0"
+pose_config_path_train = (
+    f"{pose_config_path_iter}/{os.listdir(pose_config_path_iter)[0]}/train"
 )
-ini_DLC(pose_cfg, cfg)
+
+os.listdir(pose_config_path_train)
+config_path = f"{project_path}/config.yaml"
+pose_config_path = f"{pose_config_path_train}/pose_cfg.yaml"
+
+weights_path = f"{pose_config_path_train}/snapshot-100000"
+
+# weights_path = "model/animal_-_111251 (720p)-1-2023-10-24/dlc-models/iteration-0/animal_-_111251 (720p)Oct24-trainset95shuffle1/train/snapshot-100000"
+
+ini_DLC(pose_config_path, config_path, weights_path)
 
 # body_parts = [
 #     "nose",
@@ -99,35 +110,50 @@ ini_DLC(pose_cfg, cfg)
 #     or ["nose", "front_left_thai", "front_left_paw"],
 # ]
 
-# link_parts = [
-#     ["front_right_paw", "front_left_thai"],
-#     ["front_left_paw", "front_left_thai"],
-#     ["tail_base", "back_right_thai"],
-#     ["tail_base", "back_left_thai"],
-#     ["neck_base", "front_right_paw"],
-#     ["neck_base", "front_left_paw"],
-#     ["neck_base", "tail_base"],
-#     ["neck_base", "tail_base"],
-#     ["neck_base", "front_right_thai"],
-#     ["neck_base", "front_left_thai"],
-#     ["tail_base", "back_right_thai"],
-#     ["tail_base", "back_left_thai"],
-#     ["nose", "neck_base"],
-#     ["neck_base", "tail_base"],
-#     ["nose", "mouth_end_right"],
-#     ["nose", "upper_jaw"],
-#     ["tail_end", "tail_base"],
-#     ["nose", "front_right_thai"],
-#     ["nose", "front_left_thai"],
-# ]
+
+label_parts = [
+    ["Nose", "MouthCorner", "LowerLip"],
+    ["LowerLip", "Nose", "Forehead"],
+    ["Nose", "Forehead", "Neck"],
+    ["Forehead", "Neck", "TailStart"],
+    ["Neck", "TailStart", "TailTip"],
+    ["Forehead", "Neck", "RightArm"],
+    ["Neck", "RightArm", "RightWrist"],
+    ["Forehead", "Neck", "LeftArm"],
+    ["Neck", "LeftArm", "LeftWrist"],
+    ["Neck", "TailStart", "RightFemur"],
+    ["Neck", "RightFemur", "RightAnkle"],
+    ["Neck", "TailStart", "LeftFemur"],
+    ["Neck", "LeftFemur", "LeftAnkle"],
+]
+
+link_parts = [
+    ["front_right_paw", "front_left_thai"],
+    ["front_left_paw", "front_left_thai"],
+    ["tail_base", "back_right_thai"],
+    ["tail_base", "back_left_thai"],
+    ["neck_base", "front_right_paw"],
+    ["neck_base", "front_left_paw"],
+    ["neck_base", "tail_base"],
+    ["neck_base", "tail_base"],
+    ["neck_base", "front_right_thai"],
+    ["neck_base", "front_left_thai"],
+    ["tail_base", "back_right_thai"],
+    ["tail_base", "back_left_thai"],
+    ["nose", "neck_base"],
+    ["neck_base", "tail_base"],
+    ["nose", "mouth_end_right"],
+    ["nose", "upper_jaw"],
+    ["tail_end", "tail_base"],
+    ["nose", "front_right_thai"],
+    ["nose", "front_left_thai"],
+]
 
 
 body_parts = []
 link_parts = []
 
-with open(
-    "model/preLabeled_type(Labrador_Retriever)-test01-2023-09-19/config.yaml"
-) as f:
+with open(config_path) as f:
     conf_yaml = yaml.load(f, Loader=yaml.FullLoader)
     for part in conf_yaml["bodyparts"]:
         body_parts.append(part)
@@ -203,13 +229,13 @@ def main():
 
     yolo_model = YOLO(weights_path)
     window_size = 15
-    classfier_model = load_model(f"model/LSTM_{window_size}/model.h5")
+    classfier_model = load_model(f"model/LSTM_{window_size}_18/model.h5")
 
     with open("model/onehot_encoder.pkl", "rb") as f:
         encoder = pickle.load(f)
 
     # video_name = "model/preLabeled_type(Labrador_Retriever)-test01-2023-09-19/videos/dog-walkrun-085352.avi"
-    video_name = "_mina/data/AI-Hub/poseEstimation/Validation/DOG/sourceBODYLOWER/videos/dog-bodylower-079495.avi"
+    video_name = "model/dog_-_77503 (720p)-1-2023-10-24/videos/dog_-_77503 (720p).mp4"
 
     cap = cv2.VideoCapture(video_name)
 
@@ -239,6 +265,7 @@ def main():
     count = 0
     flag = int(fps // 5)  # 초당 5개의 프레임을 추출
     seq = []
+    label = [["None"]]
     while True:
         start_time = cv2.getTickCount()
         ret, frame = cap.read()
@@ -253,20 +280,20 @@ def main():
         img = frame.copy()
         img = cv2.resize(img, dsize=(width_, height_), interpolation=cv2.INTER_LINEAR)
 
-        results = yolo_model.predict(img, imgsz=640)
+        # results = yolo_model.predict(img, imgsz=640)
         # results = model.track(img, imgsz=640, show=True, iou=threshold)
 
-        detect = results[0]
-        box_xywh = detect.boxes.xywh.cpu().numpy()
+        # detect = results[0]
+        # box_xywh = detect.boxes.xywh.cpu().numpy()
 
         # img_ = img.copy()
         # print(f"박스의 좌표 > {box_xywh}")
-        if len(box_xywh) == 0:
-            continue
-        else:
-            x, y, w, h = box_xywh[0]
-            img = img[int(y - h / 2) : int(y + h / 2), int(x - w / 2) : int(x + w / 2)]
-        img = cv2.resize(img, dsize=(width_, height_), interpolation=cv2.INTER_LINEAR)
+        # if len(box_xywh) == 0:
+        # continue
+        # else:
+        # x, y, w, h = box_xywh[0]
+        # img = img[int(y - h / 2) : int(y + h / 2), int(x - w / 2) : int(x + w / 2)]
+        # img = cv2.resize(img, dsize=(width_, height_), interpolation=cv2.INTER_LINEAR)
 
         # print("img shape ", img_.shape)
 
@@ -306,15 +333,15 @@ def main():
                 pred = classfier_model.predict(seq_)
                 label = encoder.inverse_transform(pred)
                 # print("label ? ", label)
-                cv2.putText(
-                    img,
-                    label[0][0],
-                    (int(width_ / 2), int(height_ / 2)),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    1,
-                    (0, 0, 255),
-                    2,
-                )
+        cv2.putText(
+            img,
+            label[0][0],
+            (int(width_ / 2), int(height_ / 2)),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (0, 0, 255),
+            2,
+        )
         # out_video.append(img_)
         end_time = cv2.getTickCount()
         out_writer.write(img)

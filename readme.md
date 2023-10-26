@@ -50,19 +50,20 @@ pip install tensorflow==2.11
 
 ```
 ├── model/
-│   ├── LSTM/
+│   ├── LSTM_{window_size}_{label_count}/
 │   │   ├── {best_model.h5}         // 가장 성능이 좋은 모델
 │   │   ├── {history.pkl}           // 모델의 학습 과정 중 loss, accuracy 등의 정보를 가진 객체
 │   │   ├── {model_history.png}     // 모델의 학습 과정 중 loss, accuracy 등의 정보를 그래프로 나타낸 이미지
 │   │   └── {model.h5}              // keras 모델
-│   ├── CNN/
-│   ├── GRU/
+│   ├── GRU_{window_size}_{label_count}/
+│   ├── CNN1D_{window_size}_{label_count}/
+│   ├── CNN2D_{window_size}_{label_count}/
 │   └── onehot_encoder.pkl          // 행동을 onehot encoding 한 객체
 ├── angle.py
-├── classification.py   // 모델 학습하는 코드
 ├── data_sensor.py      // 이미지의 관절 좌표를 추출하는 코드
 ├── detect.py           // yolo를 이용하여 동물의 위치를 찾는 코드
 ├── predict.py          // 영상에서 동물의 행동을 분류하는 코드
+├── train.py            // 모델 학습하는 코드
 └── README.md
 ```
 
@@ -71,7 +72,7 @@ pip install tensorflow==2.11
 ### 분류 모델 학습
 
 ```python
-python classification.py
+python train.py
 ```
 
 ### yolo를 이용하여 동물의 위치를 찾기

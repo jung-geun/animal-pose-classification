@@ -590,7 +590,7 @@ def main():
     total : int
         Total number of the data.
     """
-    # 말티즈, 비숑 프리제, 푸들,  치와와, 미니어처 핀셔, 닥스훈트,  포메라니안, 웰시 코기 (펨브록), 시추, 믹스견, 셔틀랜드 쉽독,  진돗개, 래브라도 리트리버, 보더콜리? ...
+    # 말티즈, 비숑 프리제, 푸들,  치와와, 미니어처 핀셔, 닥스훈트,  포메라니안, 웰시 코기 (펨브록), 시추, 믹스견, 셔틀랜드 쉽독,  진돗개, 래브라도 리트리버, 보더 콜리 ...
     
     # action = ["BODYLOWER", "BODYSCRATCH", "BODYSHAKE",
     #           "FEETUP", "FOOTUP", "HEADING", "LYING",

@@ -19,7 +19,7 @@ def main():
 
     model = YOLO(weights_path)
 
-    video_name = "model/preLabeled_type(Labrador_Retriever)-test01-2023-09-19/videos/dog-walkrun-085352.avi"
+    video_name = "model/animal_-_111251 (720p)-1-2023-10-24/videos/animal_-_111251 (720p).mp4"
     cap = cv2.VideoCapture(video_name)
 
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))

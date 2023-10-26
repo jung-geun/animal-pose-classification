@@ -12,9 +12,24 @@ if gpus:
     except RuntimeError as e:
         print(e)
 
-        
-        
+
 def prepare():
+    """
+        Data pre-processing for YOLO training
+        
+        Args:
+            None
+        
+        Returns:
+            src_path: list of source path for each action
+            lab_path: list of label path for each action
+            dataset: list of video names for each action
+            action: list of action names
+            
+        Example:
+            src_path, lab_path, dataset, action = prepare()
+        
+    """
     data_path = "/home/dlc/DLC/_mina/data/AI-Hub/poseEstimation/Validation/DOG"
     action = ["BODYSHAKE", "BODYLOWER", "BODYSCRATCH", 
               "WALKRUN", "SIT", "HEADING", "LYING", 
@@ -24,43 +39,40 @@ def prepare():
     lab_path = []
     dataset = []
     data_cnt, total = 0, 0
+    train_data_tot = 0
     max_data_per_action = 160         # 한 동작 당 160개의 영상
 
-    for i in range(len(action)):
-        src_path.append(
-            data_path + "/source" + action[i]
-        )  # "D:/DeepLabCut/AI-Hub/poseEstimation/Validation/DOG/sourceSIT"
-        lab_path.append(
-            data_path + "/label" + action[i]
-        )  # "D:/DeepLabCut/AI-Hub/poseEstimation/Validation/DOG/labelSIT"
-        
-        image_folders = os.listdir(src_path[i] + "/images/")
-        selected_folders = []
-        for folder in image_folders:
-            frames_folder = src_path[i] + "/images/" + folder
-            images = [
-                img for img in os.listdir(frames_folder) if img.endswith(".jpg")
-            ]
-            # 영상 폴더에 프레임 이미지의 수가 34장 이하라면, dataset에 추가 X
-            if len(images) > 34:
-                selected_folders.append(folder)
-                if len(selected_folders) >= max_data_per_action:
-                    break
+    for action_name in action:
+        src_path_action = data_path + "/source" + action_name
+        lab_path_action = data_path + "/label" + action_name
+        src_path.append(src_path_action)      # "D:/DeepLabCut/AI-Hub/poseEstimation/Validation/DOG/sourceSIT"
+        lab_path.append(lab_path_action)      # "D:/DeepLabCut/AI-Hub/poseEstimation/Validation/DOG/labelSIT"
+
+        image_folders = os.listdir(src_path_action + "/images/")
+        # list comprehension
+        # newlist = [expression for item in iterable if condition == True]
+        # 반복이 가능한 객체에 대해 item을 반복하며 해당 item이 조건에 부합한다면 표현식에 맞춰 요소를 추가하면서 새로운 list를 생성한다.
+        selected_folders = [
+            folder for folder in image_folders
+            if len(os.listdir(src_path_action + "/images/" + folder)) > 34
+        ][:max_data_per_action]     # max_data_per_action 개수만큼 선택하여 재할당
+
         dataset.append(selected_folders)
-        
-        data_cnt = len(os.listdir(src_path[i] + "/images/"))
-        print("Action_", action[i], " 총 데이터 수 : ", data_cnt)
-        print("Action_", action[i], " 학습할 데이터 수 : ", len(dataset[i]))
+        data_cnt = len(os.listdir(src_path_action + "/images/"))
+        print("Action_", action_name, " 총 데이터 수 : ", data_cnt)
+        print("Action_", action_name, " 학습할 데이터 수 : ", len(selected_folders))
         total += data_cnt
+        train_data_tot += len(selected_folders)
+
     print("실제 영상 total : ", total)
-    print("학습 영상 total : ", len(dataset)*len(dataset[0]))
+    print("학습 영상 total : ", train_data_tot)
     return src_path, lab_path, dataset, action
 
-    
-"""
-drawOnImages : 각 동작 당, max_data_per_action개의 영상. 하나의 영상마다 8장의 프레임 이미지에 바운딩 박스를 그린다.
-"""   
-def drawOnImages():
+
+def drawOnImages():    
+    """
+        각 동작 당, max_data_per_action개의 영상. 하나의 영상마다 8장의 프레임 이미지에 바운딩 박스를 그린다.
+    """   
     src_path, lab_path, dataset, action = prepare()
     save_path = '/home/dlc/DLC/_mina/yolo_output2/'  # 이미지를 저장할 경로
     os.makedirs(save_path, exist_ok=True)
@@ -112,10 +124,19 @@ def drawOnImages():
                 print(f"Warning: Not enough images in {frames_folder}")
 
 
-"""
-makeData : Yolo 학습 시키기 위해 이미지와 라벨 데이터 텍스트 파일 생성
-"""
 def makeData():
+    """
+        Make images and labels for YOLOv8 detect model training
+        
+        Args:
+            None
+        
+        Returns:
+            None
+        
+        Example:
+            makeData()
+    """
     cnt = 0
     src_path, lab_path, dataset, action = prepare()
     save_img_path_train = '/home/dlc/DLC/_mina/data/YOLO/YOLO_detect/images/train/'  # 이미지를 저장할 경로
@@ -132,47 +153,29 @@ def makeData():
         # tarin, val data를 8:2 비율로 randomly split
         # k = dataset[i] 길이의 80%에 해당하는 정수 => dataset[i] 개수 중에 k개를 무작위 선택하여 저장
         train_indices = random.sample(range(len(dataset[i])), k=int(len(dataset[i])*0.8))
+        
         # max_data_per_action 만큼 반복
         for j in range(len(dataset[i])):
-            # print("src : ", src_path, ", dataset : ", dataset[i][j])
-            frames_folder = (
-                src_path[i] + "/images/" + dataset[i][j]
-            )  # dataset의 frame들의 폴더 위치
-            images = [
-                img for img in os.listdir(frames_folder) if img.endswith(".jpg")
-            ]
+            # dataset의 frame들의 폴더 위치
+            frames_folder = src_path[i] + "/images/" + dataset[i][j]
             # 파일 이름을 기준으로 정렬하여 목록 생성
             try:
-                images.sort(key=lambda x: int(x.split("_")[1]))
+                images = sorted([img for img in os.listdir(frames_folder) if img.endswith(".jpg")], key=lambda x: int(x.split("_")[1]))
             except ValueError as e:
                 print(f"\n Please CHECK !! \nError sorting images in {frames_folder}: {e}")
-                
-            json_path = (
-                lab_path[i] + "/json/" + dataset[i][j] + ".json"
-            )  # coords가 있는 json 경로
+            
+            # coords가 있는 json 경로    
+            json_path = lab_path[i] + "/json/" + dataset[i][j] + ".json"
 
             with open(json_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
-            # 선택한 키의 값만 추출
-            selected_data = []
-            for annotation in data["annotations"]:
-                row = []
-                for key, value in annotation["bounding_box"].items():
-                    if value is not None:
-                        row.append(value)
-                    else:
-                        row.append(None)
-                selected_data.append(row)
+            selected_data = [[value for key, value in annotation["bounding_box"].items()] for annotation in data["annotations"]]
                 
-            if j in train_indices:
-                save_img_path = save_img_path_train
-                save_txt_path = save_txt_path_train
-            else:
-                save_img_path = save_img_path_val
-                save_txt_path = save_txt_path_val
-                
-            # 1, 3, 8, 10, 17, 21, 34, 35 번째 프레임 사용 (총 8장)
+            save_img_path = save_img_path_train if j in train_indices else save_img_path_val
+            save_txt_path = save_txt_path_train if j in train_indices else save_txt_path_val
+             
+            # 1, 3, 8, 10, 17, 21, 34, 35 번째 프레임 사용 (frame number X, 총 8장)   
             for index in [0, 2, 7, 9, 16, 20, 33, 34]:
                 frame = cv2.imread(os.path.join(frames_folder, images[index]))
                 # bounding box의 좌표와 너비, 높이
@@ -193,42 +196,41 @@ def makeData():
     print("라벨링 데이터 수 : ",cnt)
     print("train 라벨 총 개수 : ", len(os.listdir(save_img_path_train)))
     print("val 라벨 총 개수 : ", len(os.listdir(save_img_path_val)))
-
-
    
  
-"""
-pip install ultralytics
-pip install "deeplabcut[tf,modelzoo]"
-pip install tensorflow==2.11
-pip install torch==1.12.0+cu113 torchvision==0.13.0+cu113 torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cu113
-
-pip install --upgrade --fore-reinstall ultralytics
-"which python"와 "sys.executable" 같은지 확인
-
-train_model : YOLOv8 model 학습
-"""  
+ 
 def trainModel():
+    """
+        pip install ultralytics
+        pip install "deeplabcut[tf,modelzoo]"
+        pip install tensorflow==2.11
+        pip install torch==1.12.0+cu113 torchvision==0.13.0+cu113 torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cu113
+
+        pip install --upgrade --fore-reinstall ultralytics
+        "which python"와 "sys.executable" 같은지 확인
+
+        train_model : YOLOv8 model 학습
+    """ 
     # Load a model
     model = YOLO("yolov8n.yaml")  # build a new model from scratch
 
     # Use the model
-    model.train(data="/home/dlc/DLC/_mina/data/YOLO/config.yaml", epochs=120,  resume=False,
-                project="/home/dlc/DLC/_mina/project/YOLO", name="YOLO_detect_train")  # train the model
+    model.train(data="/home/dlc/DLC/_mina/data/YOLO/YOLO_detect/config.yaml", epochs=120,  resume=False,
+                project="/home/dlc/DLC/_mina/project/YOLO/YOLO_detect", name="train")  # train the model
     # # Validate the model
     # model.val()  # evaluate model performance on the validation set
             
 
-"""
-predict : yolo model 불러온 후 예측
-"""     
 def predict():
+    """
+        Predict using YOLOv8 model
+    """
     import moviepy.editor as mp
     # YOLO 모델 불러오기
-    model = YOLO('/home/dlc/DLC/_mina/project/YOLO/YOLO_detect_train/weights/last.pt')
+    model = YOLO('/home/dlc/DLC/_mina/project/YOLO/YOLO_detect/train/weights/last.pt')
 
     project="/home/dlc/DLC/_mina/project/YOLO"
-    name="YOLO_detect_predict"
+    name="predict"
     keyword = "snow"
     video_crop_path = "/home/dlc/DLC/_mina/yolo_output/" + keyword + ".avi"
     video_path = "/home/dlc/DLC/_mina/data/experimental_videos/" + keyword + ".mp4"
@@ -279,15 +281,15 @@ def predict():
     video.release()
 
 
-"""
-modelZoo : DeepLapCut - modelZoo - superanimal_quadruped 사용
-"""
 def modelZoo():
+    """
+        modelZoo : DeepLapCut - modelZoo - superanimal_quadruped 사용
+    """   
     import deeplabcut
     model_options = deeplabcut.create_project.modelzoo.Modeloptions
     project_name = 'myDLC_modelZoo'
     your_name = 'teamDLC'
-    video_path = ['/home/dlc/DLC/_mina/project/YOLO/YOLO_detect_predict/crops/cropped_vdo/run.avi']
+    video_path = ['/home/dlc/DLC/_mina/project/YOLO/YOLO_detect/predict/crops/cropped_vdo/run.avi']
     model2use = model_options[8]            # 2 : full dog, 8 : superanimal_quadruped
     videotype = os.path.splitext(video_path[0])[-1].lstrip('.') #or MOV, or avi, whatever you uploaded!
     # video_path = deeplabcut.DownSampleVideo(video_path[1], width=300)
@@ -329,7 +331,7 @@ def modelZoo():
     deeplabcut.create_labeled_video(config_path, [full_video_path], videotype=videotype, filtered=True)
     
     
-    # video_path = '/home/dlc/DLC/_mina/project/YOLO/YOLO_detect_predict/crops/cropped_vdo/run.avi'
+    # video_path = '/home/dlc/DLC/_mina/project/YOLO/YOLO_detect/predict/crops/cropped_vdo/run.avi'
     # superanimal_name = 'superanimal_quadruped'
     # scale_list = range(200, 600, 50)  # image height pixel size range and increment
     # deeplabcut.video_inference_superanimal([video_path], superanimal_name, scale_list=scale_list)

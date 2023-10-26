@@ -86,64 +86,63 @@ label_parts = [
     direction,
 ]
 
-path = os.getcwd()
-project_path = (
-    path + "/_mina/project/DLC/preLabeled_type(Labrador_Retriever)-test01-2023-09-19"
-)
-weight_count = 50000
-weight_path = (
-    project_path
-    + "/dlc-models/iteration-0/preLabeled_type(Labrador_Retriever)Sep19-trainset95shuffle1/train/snapshot"
-    + str(weight_count)
-)
+# path = os.getcwd()
+# project_path = (
+# path + "/model/animal_-_111251 (720p)-1-2023-10-24"
+# )
+# weight_count = 50000
+# weight_path = (
+# project_path
+# + "/dlc-models/iteration-0/animal_-_111251 (720p)Oct24-trainset95shuffle1/train/snapshot"
+# + str(weight_count)
+# )
 
-pose_yaml_path = (
-    project_path
-    + "/dlc-models/iteration-0/preLabeled_type(Labrador_Retriever)Sep19-trainset95shuffle1/train/pose_cfg.yaml"
-)
-base_conf_path = project_path + "/config.yaml"
+# pose_yaml_path = (
+# project_path
+# + "/dlc-models/iteration-0/animal_-_111251 (720p)Oct24-trainset95shuffle1/train/pose_cfg.yaml"
+# )
+# base_conf_path = project_path + "/config.yaml"
 
-with open(base_conf_path) as f:
-    conf_yaml = yaml.load(f, Loader=yaml.FullLoader)
+# with open(base_conf_path) as f:
+#     conf_yaml = yaml.load(f, Loader=yaml.FullLoader)
 
-    # print(conf_yaml["bodyparts"])
-    bodyparts = []
-    for part in conf_yaml["bodyparts"]:
-        bodyparts.append(part)
+#     # print(conf_yaml["bodyparts"])
+#     bodyparts = []
+#     for part in conf_yaml["bodyparts"]:
+#         bodyparts.append(part)
 
-weight_path = "/drive/samba/private_files/jupyter/DLC/_mina/project/DLC/preLabeled_type(Labrador_Retriever)-test01-2023-09-19/dlc-models/iteration-0/preLabeled_type(Labrador_Retriever)Sep19-trainset95shuffle1/train/snapshot-50000"
+weight_path = "/home/pieroot/jupyter/DLC/model/animal_-_111251 (720p)-1-2023-10-24/dlc-models/iteration-0/animal_-_111251 (720p)Oct24-trainset95shuffle1/train/snapshot-100000"
 
 
-def ini_DLC(config_path=pose_yaml_path, cfg_path=base_conf_path):
+def ini_DLC(config_path, cfg_path, weight_path):
     """
     Args:
         config_path = DeepLabCut 의 학습 pose_cfg.yaml 파일 경로
         cfg_path = DeepLabCut 의 기본 설정 파일 config.yaml 경로
     """
-    global pose_yaml_path, base_conf_path
     print("초기화 중...")
 
     print("config_path : ", config_path)
     print("cfg_path : ", cfg_path)
 
-    # film = {}
+    film = {}
 
-    # with open(config_path) as f:
-    #     film = yaml.load(f, Loader=yaml.FullLoader)
-    #     # display(film)
-    #     # film['init_weights'] = film['init_weights_old']
-    #     # film["init_weights_old"] = film["init_weights"]
-    #     film["init_weights"] = weight_path
-    #     film["mean_pixel"] = [123.68, 116.779, 103.939]
-    #     film["weight_decay"] = 0.0001
-    #     film["pairwise_predict"] = False
-    #     film["partaffinityfield_predict"] = False
-    #     film["stride"] = 8.0
-    #     film["intermediate_supervision"] = False
-    #     film["dataset_type"] = "imgaug"
+    with open(config_path) as f:
+        film = yaml.load(f, Loader=yaml.FullLoader)
+        # display(film)
+        # film['init_weights'] = film['init_weights_old']
+        # film["init_weights_old"] = film["init_weights"]
+        film["init_weights"] = weight_path
+        film["mean_pixel"] = [123.68, 116.779, 103.939]
+        film["weight_decay"] = 0.0001
+        film["pairwise_predict"] = False
+        film["partaffinityfield_predict"] = False
+        film["stride"] = 8.0
+        film["intermediate_supervision"] = False
+        film["dataset_type"] = "imgaug"
 
-    # with open(config_path, "w") as f:
-    # yaml.dump(film, f)
+    with open(config_path, "w") as f:
+        yaml.dump(film, f)
 
     global dlc_cfg, cfg, batchsize
 
@@ -193,22 +192,22 @@ def get_img_coord(src_img):
     frames = np.empty(
         (batchsize, ny, nx, 3), dtype="ubyte"  # this keeps all the frames of a batch
     )
-    frames[batch_ind] = img_as_ubyte(im)
-    # if cfg["cropping"]:
-    # frames[batch_ind] = img_as_ubyte(
-    # im[cfg["y1"] : cfg["y2"], cfg["x1"] : cfg["x2"]]
-    # )
-    # else:
     # frames[batch_ind] = img_as_ubyte(im)
+    if cfg["cropping"]:
+        frames[batch_ind] = img_as_ubyte(
+            im[cfg["y1"] : cfg["y2"], cfg["x1"] : cfg["x2"]]
+        )
+    else:
+        frames[batch_ind] = img_as_ubyte(im)
 
     # if batch_ind == batchsize - 1:
-    # pose = predict.getposeNP(frames, dlc_cfg, sess, inputs, outputs)
+    #     pose = predict.getposeNP(frames, dlc_cfg, sess, inputs, outputs)
     #     # PredictedData[batch_num * batchsize : (batch_num + 1) * batchsize, :]
     #     # = pose
-    # batch_ind = 0
-    # batch_num += 1
+    #     batch_ind = 0
+    #     batch_num += 1
     # else:
-    # batch_ind += 1
+    #     batch_ind += 1
 
     # if batch_ind > 0:
     # take care of the last frames (the batch that might have been
