@@ -42,8 +42,6 @@ valid/
 
 README.roboflow.txt
 README.dataset.txt
-*.png
-*.jpg
 plt.ipynb
 model/CNN*_13
 model/LSTM_*_13
