@@ -9,11 +9,8 @@ videos/
 videos2/
 out/
 ha/
-dog1/
-model/random_forest/*.pkl
 
-_mina/data/
-_mina/project/
+_mina/
 study/
 
 # 학습할 데이터
@@ -34,10 +31,8 @@ data*
 *.sln
 *.sw?
 
-행동분류 개발 모델(유니스트)/
-Zoo/
-model/pre*
 논문 중간/
+
 runs/
 test/
 train/
@@ -50,4 +45,9 @@ README.dataset.txt
 *.png
 *.jpg
 plt.ipynb
-model/
+model/CNN*_13
+model/LSTM_*_13
+model/GRU_*_13
+model/*-2023-10-24
+model/Labrador_Retriever
+gradio_cached_examples/

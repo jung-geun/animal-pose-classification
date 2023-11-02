@@ -125,14 +125,14 @@ def make_lstm(window=10):
     model.add(Dropout(0.3))
     model.add(LSTM(128, return_sequences=True))
     model.add(Dropout(0.3))
-    # model.add(Flatten())
     model.add(LSTM(64, return_sequences=False))
+    model.add(Flatten())
     model.add(Dropout(0.2))
     model.add(Dense(64, activation="relu"))
     model.add(Dense(13, activation="softmax"))
 
     model.compile(
-        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy", "mse"]
     )
 
     print(model.summary())
@@ -146,21 +146,20 @@ def make_gru(window=10):
         GRU(
             256,
             input_shape=(window, len(label_parts)),
-            dropout=0.3,
             return_sequences=True,
         )
     )
-    model.add(GRU(128, dropout=0.25, return_sequences=True))
-    # model.add(GRU(128, dropout=0.25, return_sequences=True))
-    # model.add(GRU(64, dropout=0.25, return_sequences=True))
-    model.add(GRU(64, dropout=0.25, return_sequences=False))
-    # model.add(Dense(128, activation="relu"))
-    # model.add(Dropout(0.2))
-    # model.add(Dense(64, activation="relu"))
+    model.add(Dropout(0.3))
+    model.add(GRU(128, return_sequences=True))
+    model.add(Dropout(0.3))
+    model.add(GRU(64, return_sequences=False))
+    model.add(Flatten())
+    model.add(Dropout(0.2))
+    model.add(Dense(64, activation="relu"))
     model.add(Dense(13, activation="softmax"))
 
     model.compile(
-        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy", "mse"]
     )
 
     print(model.summary())
@@ -188,7 +187,7 @@ def make_cnn2d(window=10):
     model.add(Dense(13, activation="softmax"))
 
     model.compile(
-        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy", "mse"]
     )
 
     print(model.summary())
@@ -216,7 +215,7 @@ def make_cnn1d(window=10):
     model.add(Dense(13, activation="softmax"))
 
     model.compile(
-        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy", "mse"]
     )
 
     print(model.summary())
@@ -269,7 +268,9 @@ def make_data(window=10):
                 angle_arr = []
                 for m_d in meta_data:
                     angle = out(
-                        inputs=m_d, body_parts=body_parts, label_parts=label_parts
+                        inputs=m_d,
+                        body_parts=body_parts,
+                        label_parts=label_parts,
                     )
                     angle_arr.append(angle)
                 np_tmp = []
@@ -428,9 +429,9 @@ def score_check(model_name="LSTM", window=10, verbose=1):
         plt.savefig(f"{dir_name}/model_history.png")
 
 
-# for w in [10, 15, 20]:
-    # for model in ["LSTM", "GRU", "CNN1D"]:
-        # score_check(model_name=model, window=w)
+for w in [10, 15, 20]:
+    for model in ["LSTM", "GRU", "CNN1D"]:
+        score_check(model_name=model, window=w)
 
-for w in [15]:
-    score_check("lstm", window=w)
+# for w in [15]:
+# score_check("lstm", window=w)

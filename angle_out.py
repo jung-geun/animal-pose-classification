@@ -4,7 +4,7 @@ import sys
 import numpy as np
 
 
-def Angle(arr) -> float:
+def Angle(arr):
     """
     # 앵글을 계산하는 함수
     ## 3개의 점을 받아서 앵글을 계산한다.
@@ -16,10 +16,10 @@ def Angle(arr) -> float:
     # seta2 = np.arctan((c["x"] - b["x"]) / (c["y"] - b["y"]))
     seta1 = np.arctan2(a["x"] - b["x"], a["y"] - b["y"])
     seta2 = np.arctan2(c["x"] - b["x"], c["y"] - b["y"])
-    
+
     seta = seta1 - seta2
     # a = np.arctan2(arr[0]["x"] - arr[1]["x"], arr[0]["y"] - arr[1]["y"]) - np.arctan2(
-        # arr[1]["x"] - arr[2]["x"], arr[1]["y"] - arr[2]["y"]
+    # arr[1]["x"] - arr[2]["x"], arr[1]["y"] - arr[2]["y"]
     # )
 
     PI = np.pi
@@ -32,7 +32,8 @@ def out(
     inputs: np.ndarray,
     body_parts=None,
     label_parts=None,
-) -> np.ndarray:
+    threshold=0.05,
+):
     """
     # 앵글 데이터를 추출하는 함수
     ex> inputs = np.array([{"x": 0, "y": 0}, {"x": 1, "y": 1}, {"x": 2, "y": 2}, {"x": 3, "y": 3}])
@@ -66,6 +67,11 @@ def out(
         loc_x = data[index]["x"]
         loc_y = data[index]["y"]
         # loc_likelihood = data[index]['likelihood']
+
+        if data[index]["likelihood"] < threshold:
+            loc_x = 0
+            loc_y = 0
+            # loc_likelihood = 0
 
         loc_data[body_parts[index]] = {
             "x": loc_x,
