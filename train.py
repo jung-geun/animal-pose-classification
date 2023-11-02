@@ -167,6 +167,28 @@ def make_gru(window=10):
     return model
 
 
+def make_gru_old(window=10):
+    model = Sequential()
+    model.add(
+        GRU(
+            256,
+            input_shape=(window, len(label_parts)),
+            dropout=0.3,
+            return_sequences=True,
+        )
+    )
+    model.add(GRU(128, dropout=0.25, return_sequences=True))
+    model.add(GRU(64, dropout=0.25, return_sequences=False))
+    model.add(Dense(64, activation="relu"))
+    model.add(Dense(13, activation="softmax"))
+
+    model.compile(
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy", "mse"]
+    )
+    print(model.summary())
+    return model
+
+
 def make_cnn2d(window=10):
     model = Sequential()
     model.add(

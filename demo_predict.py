@@ -97,7 +97,8 @@ def analyze(video, name, model_name):
         direction,
     ]
 
-    weights_path = "/home/dlc/DLC/runs/detect/train4/weights/best.pt"
+    # weights_path = "/home/dlc/DLC/runs/detect/train4/weights/best.pt"
+    weights_path = "yolov8n.pt"
 
     yolo_model = YOLO(weights_path)
     window_size = 15
@@ -142,6 +143,7 @@ def analyze(video, name, model_name):
     label_ = "None"
     pbar = tqdm(iterable=range(total_frame_count), desc="Processing", unit="frame")
     before_label = []
+    # dog_index = 16.0
     while True:
         start_time = cv2.getTickCount()
         ret, frame = cap.read()
@@ -151,7 +153,25 @@ def analyze(video, name, model_name):
             break
 
         img = frame.copy()
+       
         img = cv2.resize(img, dsize=(width_, height_), interpolation=cv2.INTER_LINEAR)
+        # results = yolo_model.predict(img, imgsz=640)
+
+        # detect = results[0]
+        # box_xywh = detect.boxes.xywh.cpu().numpy()
+        # box_class = detect.boxes.cls.cpu().tolist()
+        # print(box_class)
+
+        # # img_ = img.copy()
+        # # print(f"박스의 좌표 > {box_xywh}")
+        # if len(box_xywh) == 0 or dog_index not in box_class:
+        #     continue
+        # else:
+        #     box_dog = box_class.index(dog_index)
+        #     x, y, w, h = box_xywh[box_dog]
+        #     img = img[int(y - h / 2)-20 : int(y + h / 2)+20, int(x - w / 2)-20 : int(x + w / 2)+20]
+        #     img = cv2.resize(img, dsize=(width_, height_), interpolation=cv2.INTER_LINEAR)
+
         point = get_img_coord(img)
 
         for p in point:

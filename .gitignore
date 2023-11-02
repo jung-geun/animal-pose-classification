@@ -19,6 +19,11 @@ data*
 
 *.pdf
 *.hwp
+*.docx
+*.pptx
+*.xlsx
+*.xls
+*.zip
 
 # 에디터 생성 파일
 .vscode/*

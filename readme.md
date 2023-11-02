@@ -5,8 +5,7 @@
 > 한국정보처리학회 에 투고한 논문의 연구 결과 입니다.
 > <br>
 > '반려견 영상 실시간 행동 인식 시스템' 논문을 참고하시면 더 자세한 내용을 확인하실 수 있습니다.
-> <br>
-> <br>
+> <br> > <br>
 > 이 repository 는 논문 이후에 추가로 연구하여 변경된 사항들이 기록되는 곳 입니다
 > <br>
 > 웨어러블 센서를 이용하지 않고 영상만으로 동물의 행동을 분류합니다.
@@ -17,15 +16,14 @@
 
 ```
 ├── model/
-│   ├── LSTM_{window_size}_{label_count}/
-│   │   ├── {best_model.h5}         // 가장 성능이 좋은 모델
-│   │   ├── {history.pkl}           // 모델의 학습 과정 중 loss, accuracy 등의 정보를 가진 객체
-│   │   ├── {model_history.png}     // 모델의 학습 과정 중 loss, accuracy 등의 정보를 그래프로 나타낸 이미지
-│   │   └── {model.h5}              // keras 모델
-│   ├── GRU_{window_size}_{label_count}/
-│   ├── CNN1D_{window_size}_{label_count}/
-│   ├── CNN2D_{window_size}_{label_count}/
+│   ├── {model_name}_{window_size}_{label_count}/
+│   │   ├── best_model.h5           // 가장 성능이 좋은 모델
+│   │   ├── history.pkl             // 모델의 학습 과정 중 loss, accuracy 등의 정보를 가진 객체
+│   │   ├── model_history.png       // 모델의 학습 과정 중 loss, accuracy 등의 정보를 그래프로 나타낸 이미지
+│   │   └── model.h5                // keras 모델
+│   ├── {deeplabcut model}/         // deeplabcut 모델 디렉토리
 │   └── onehot_encoder.pkl          // 행동을 onehot encoding 한 객체
+├── videos/experimental_videos/     // 실험 영상
 ├── angle.py
 ├── data_sensor.py      // 이미지의 관절 좌표를 추출하는 코드
 ├── detect.py           // yolo를 이용하여 동물의 위치를 찾는 코드
@@ -133,7 +131,6 @@ python demo_gradio.py
 #### validation accuracy
 
 ![val_result.png](./model/result/val_result.png)
-
 
 ## collaborators
 

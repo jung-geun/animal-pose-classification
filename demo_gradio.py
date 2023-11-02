@@ -9,7 +9,7 @@ import os
 from demo_predict import analyze
 
 theme = gr.themes.Monochrome()
-vdo_dir = "./videos2/experimental_videos/"
+vdo_dir = "./videos/experimental_videos/"
 
 
 def video_identity(video):
