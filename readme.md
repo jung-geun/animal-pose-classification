@@ -62,6 +62,7 @@
 - deeplabcut 모델 -> model/
 
 ```bash
+# bash
 wget https://pieroot.xyz/file/public/experimental_videos.tar.gz \
 -O experimental_videos.tar.gz
 tar -xvf experimental_videos.tar.gz -C videos/
@@ -174,6 +175,7 @@ conda install -c conda-forge cudatoolkit=11.2 cudnn=8.1.0
 환경변수 설정
 
 ```bash
+# bash
 mkdir -p $CONDA_PREFIX/etc/conda/activate.d
 echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/' > $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
 ```
