@@ -31,7 +31,7 @@ def video_identity(video):
     model_name = glob.glob("./model/" + name + "*")[
         0
     ]  # /home/dlc/DLC/model/animal_-_111251 (720p)-1-2023-10-24
-    video = analyze(video, name, model_name)
+    video = analyze(video, name, model_name, False)
     return video
 
 

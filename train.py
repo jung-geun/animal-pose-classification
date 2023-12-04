@@ -61,21 +61,6 @@ body_parts = [
     "TailTip",
 ]
 
-label_parts = [
-    ["Nose", "MouthCorner", "LowerLip"],
-    ["LowerLip", "Nose", "Forehead"],
-    ["Nose", "Forehead", "Neck"],
-    ["Forehead", "Neck", "TailStart"],
-    ["Neck", "TailStart", "TailTip"],
-    ["Forehead", "Neck", "RightArm"],
-    ["Neck", "RightArm", "RightWrist"],
-    ["Forehead", "Neck", "LeftArm"],
-    ["Neck", "LeftArm", "LeftWrist"],
-    ["Neck", "TailStart", "RightFemur"],
-    ["Neck", "RightFemur", "RightAnkle"],
-    ["Neck", "TailStart", "LeftFemur"],
-    ["Neck", "LeftFemur", "LeftAnkle"],
-]
 
 
 frontRightView = ["RightWrist", "RightArm", "Nose"]
@@ -358,6 +343,9 @@ def load_data(window=10):
 def score_check(model_name="LSTM", window=10, verbose=1):
     """
     학습 및 점수 체크
+    :param model_name: 모델 종류
+    :param window: 윈도우 사이즈
+    :param verbose: 학습 과정 출력 여부
     """
     print("score check")
     try:
@@ -455,5 +443,3 @@ for w in [10, 15, 20]:
     for model in ["LSTM", "GRU", "CNN1D"]:
         score_check(model_name=model, window=w)
 
-# for w in [15]:
-# score_check("lstm", window=w)

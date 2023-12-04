@@ -12,7 +12,13 @@ from tensorflow.keras.models import load_model
 from data_sensor import get_img_coord, ini_DLC
 
 
-def analyze(video, name, model_name):
+def analyze(video, name, model_name, show=False):
+    """
+    video: 비디오 경로
+    name: 저장할 비디오 이름
+    model_name: 모델 경로
+    show: 비디오 출력 여부
+    """
     project_path = model_name
     pose_config_path_iter = f"{project_path}/dlc-models/iteration-0"
     pose_config_path_train = (
@@ -98,9 +104,9 @@ def analyze(video, name, model_name):
     ]
 
     # weights_path = "/home/dlc/DLC/runs/detect/train4/weights/best.pt"
-    weights_path = "yolov8n.pt"
+    # weights_path = "yolov8n.pt"
 
-    yolo_model = YOLO(weights_path)
+    # yolo_model = YOLO(weights_path)
     window_size = 15
     classification_model = load_model(
         f"/home/dlc/DLC/model/LSTM_{window_size}_18/model.h5"
@@ -249,9 +255,9 @@ def analyze(video, name, model_name):
 
         if count > 0:
             time_seq_avg += time_seq
-
-        cv2.imshow("img", img_)
-        cv2.waitKey(1)
+        if show:
+            cv2.imshow("img", img_)
+            cv2.waitKey(1)
 
         pbar.update(1)
 

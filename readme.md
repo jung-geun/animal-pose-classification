@@ -12,6 +12,21 @@
 > <br>
 > 이 프로젝트에서는 객체를 탐지하는데 YOLOv8을 사용하였고, 객체의 관절 좌표를 추출하는데 deeplabcut을 사용하였습니다.
 
+> 현재 동시에 두가지 이상 동작(ex> 꼬리 흔들기 + 앞발 들기) 을 분류하는 것은 불가능합니다.
+> <br>
+> 이는 향후 연구를 통해 개선할 수 있습니다.
+
+## 목차
+
+```
+1. 파일 구조
+2. 필요한 파일
+3. Requirements
+4. 사용법
+5. 결과
+6. collaborators
+```
+
 ## 파일 구조
 
 ```
@@ -24,7 +39,7 @@
 │   ├── {deeplabcut model}/         // deeplabcut 모델 디렉토리
 │   └── onehot_encoder.pkl          // 행동을 onehot encoding 한 객체
 ├── videos/experimental_videos/     // 실험 영상
-├── angle.py
+├── angle.py            // 관절 좌표를 이용하여 각도를 계산하는 코드
 ├── data_sensor.py      // 이미지의 관절 좌표를 추출하는 코드
 ├── detect.py           // yolo를 이용하여 동물의 위치를 찾는 코드
 ├── predict.py          // 영상에서 동물의 행동을 분류하는 코드
@@ -34,16 +49,62 @@
 └── README.md
 ```
 
+### 필요한 파일
+
+- [학습한 영상 파일](https://pieroot.xyz/file/public/experimental_videos.tar.gz)
+- [deeplabcut 모델](https://pieroot.xyz/file/public/model.tar.gz)
+
+위 링크를 통해 각 파일을 다운로드
+<br>
+받아 압축을 풀고 model 디렉토리와 videos 디렉토리를 프로젝트 디렉토리에 위치시킵니다.
+
+- 영상 파일 -> videos/experimental_videos/
+- deeplabcut 모델 -> model/
+
+```bash
+wget https://pieroot.xyz/file/public/experimental_videos.tar.gz \
+-O experimental_videos.tar.gz
+tar -xvf experimental_videos.tar.gz -C videos/
+
+wget https://pieroot.xyz/file/public/model.tar.gz
+tar -xvf model.tar.gz -C model/
+```
+
 ## Requirements
 
 > - python == 3.10
-> - deeplabcut[tf,gui]
-> - tensorflow == 2.11
-> - ultralytics
+> - ultralytics==8.0.222
+> - deeplabcut[tf,gui]==2.3.8
 > - torch == 1.12
+> - scikit-learn==1.3.2
+> - tensorflow == 2.11.1
 > - gradio
+> - cudatoolkit=11.2
+> - cudnn=8.1.0
 
-## Installation
+위 환경에서 테스트 되었고, 다른 환경에서 검증되지 않았습니다.
+<br>
+아래의 방법으로 환경을 구성하시길 권장합니다.
+
+gpu 사용시 자동 설치를, cpu 사용시 수동 설치를 진행하시길 권장합니다.
+
+## 자동 설치
+
+anaconda 설치
+
+```bash
+conda env create -f environment.yml
+
+conda activate animal
+```
+
+pip 설치
+
+```bash
+pip install -r requirements.txt
+```
+
+## 수동 설치
 
 ### yolo 설치
 
@@ -57,14 +118,16 @@ conda activate animal
 yolo 의 경우 의존성 문제가 중요함으로 가장 먼저 설치를 진행합니다.
 
 ```python
-pip install ultralytics
+pip install ultralytics==8.0.222
 ```
 
 ### deeplabcut 설치
 
 ```python
-pip install "deeplabcut[tf,gui]"
+pip install "deeplabcut[tf,gui]"==2.3.8
 ```
+
+### torch 버전 변경
 
 deeplabcut 이 pytorch 버전이 1.12 이하만 지원이 되기 때문에 pytorch 버전을 1.12로 맞춰줍니다.
 
@@ -72,18 +135,47 @@ deeplabcut 이 pytorch 버전이 1.12 이하만 지원이 되기 때문에 pytor
 pip install torch==1.12.0+cu113 torchvision==0.13.0+cu113 torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cu113
 ```
 
-윈도우의 의존성 문제로 deeplabcut이 tensorflow 2.10 으로 강제로 내려 설치가 된다
+### tensorflow 버전 변경
+
+윈도우의 의존성 문제로 deeplabcut이 tensorflow 2.10 버전으로 강제로 내려 설치가 진행됩니다.
 <br>
 tensorflow 2.11 버전으로 설치를 진행합니다.
 
 ```python
-pip install tensorflow==2.11
+pip install tensorflow==2.11.1
 ```
 
 ### gradio 설치
 
 ```python
 pip install gradio
+```
+
+<!-- 중요 -->
+
+## gpu 사용을 위해 반드시 필요!
+
+> gpu 사용을 위해 반드시 필요한 과정입니다.
+
+> conda 환경에 진행해야 다른 환경에 영향을 주지 않습니다.
+
+### gpu 드라이버 설치
+
+gpu 드라이버를 설치해야 gpu 를 사용하여 학습 및 추론이 가능합니다.
+<br>
+자동 설치시 아래 환경변수만 설정하면 됩니다.
+
+**nvidia 그래픽 카드를 사용하는 경우**
+
+```bash
+conda install -c conda-forge cudatoolkit=11.2 cudnn=8.1.0
+```
+
+환경변수 설정
+
+```bash
+mkdir -p $CONDA_PREFIX/etc/conda/activate.d
+echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/' > $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
 ```
 
 ## 사용법

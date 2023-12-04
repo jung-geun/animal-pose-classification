@@ -1,21 +1,14 @@
-# from collections import defaultdict
 
 import cv2
 
 import numpy as np
 
-# import torch
 from ultralytics import YOLO
 
-# from sort import *
-
-# mot_tracker = Sort()
 
 
 def main():
-    # weights_path = "_mina/project/YOLO_test_train/weights/best.pt"
     weights_path = "runs/detect/train4/weights/best.pt"
-    # weights_path = "yolov8n.pt"
 
     model = YOLO(weights_path)
 
@@ -28,21 +21,19 @@ def main():
 
     print(f"width: {width}, height: {height}, fps: {fps}")
 
+    # 가로 세로 비율에 따라서 width_, height_를 정합니다.
+
     if width > height:
         width_ = 640
         height_ = 480
     else:
         width_ = 480
         height_ = 640
-    # scale_width = width / width_
-    # scale_height = height / height_
 
     print(f"width_: {width_}, height_: {height_}")
-    # print(f"scale_width: {scale_width}, scale_height: {scale_height}")
 
     threshold = 0.5
 
-    # out_video = []
     fourcc = cv2.VideoWriter_fourcc("m", "p", "4", "v")
     video_name = video_name.split("/")[-1].split(".")[0]
 
@@ -80,11 +71,6 @@ def main():
         out.write(img_)
 
     # 사용한 자원을 해제합니다.
-
-    # out_width, out_height = out_video[0].shape[:2]
-    # cv2.imwrite(f"out/{video_name}_predic.jpg", img_)
-
-    # for frame in out_video:
 
     cap.release()
     out.release()
