@@ -61,15 +61,7 @@
 - 영상 파일 -> videos/experimental_videos/
 - deeplabcut 모델 -> model/
 
-```bash
-# bash
-wget https://pieroot.xyz/file/public/experimental_videos.tar.gz \
--O experimental_videos.tar.gz
-tar -xvf experimental_videos.tar.gz -C videos/
-
-wget https://pieroot.xyz/file/public/model.tar.gz
-tar -xvf model.tar.gz -C model/
-```
+> wget 을 통한 다운로드는 막혀 있습니다
 
 ## Requirements
 
