@@ -51,8 +51,8 @@
 
 ### 필요한 파일
 
-- [학습한 영상 파일](https://pieroot.xyz/file/public/experimental_videos.tar.gz){: target="\_blank"}
-- [deeplabcut 모델](https://pieroot.xyz/file/public/model.tar.gz){: target="\_blank"}
+- <a href="https://pieroot.xyz/file/public/experimental_videos.tar.gz" target="_blank">학습한 영상 파일</a>
+- <a href="https://pieroot.xyz/file/public/model.tar.gz" target="_blank">deeplabcut 모델</a>
 
 위 링크를 통해 각 파일을 다운로드
 <br>
