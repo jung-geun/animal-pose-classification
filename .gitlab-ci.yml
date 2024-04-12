@@ -1,8 +1,7 @@
 stages:
-  - build
-  - test
   - sonarqube-check
   - sonarqube-vulnerability-report
+  - test
 
 include:
   - template: Jobs/Dependency-Scanning.gitlab-ci.yml
